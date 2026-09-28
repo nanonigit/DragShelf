@@ -21,6 +21,7 @@ enum DragShelfMain {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    private let menuBarVisibilityKey = "showMenuBarIcon"
     private let log = Logger(subsystem: "dev.local.DragShelf", category: "Detection")
     private let shelf = ShelfController()
     private let probe = DragPasteboardProbe()
@@ -31,11 +32,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var lastPermissionGranted: Bool?
     private var pendingHide: DispatchWorkItem?
     private var statusItem: NSStatusItem?
-    private var modeItem: NSMenuItem?
-    private var permissionItem: NSMenuItem?
-    private var loginItem: NSMenuItem?
-    private var displayItems: [ShelfDisplayMode: NSMenuItem] = [:]
-    private var placementItems: [ShelfPlacement: NSMenuItem] = [:]
+    private var visibilityItem: NSMenuItem?
+    private var countItem: NSMenuItem?
     private var loggedFirstMove = false
     private let loginService = SMAppService.loginItem(identifier: "com.github.nanonigit.DragShelf.LoginItem")
 
@@ -45,51 +43,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
         menu.addItem(NSMenuItem(title: "管理画面を開く", action: #selector(openManagement), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "棚を表示", action: #selector(showShelf), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "棚を隠す", action: #selector(hideShelf), keyEquivalent: ""))
-
-        let displayMenu = NSMenu()
-        for (title, mode) in [("リスト", ShelfDisplayMode.list), ("アイコン", .icons)] {
-            let choice = NSMenuItem(title: title, action: #selector(selectDisplayMode(_:)), keyEquivalent: "")
-            choice.representedObject = mode.rawValue
-            choice.target = self
-            displayMenu.addItem(choice)
-            displayItems[mode] = choice
-        }
-        let displayItem = NSMenuItem(title: "表示形式", action: nil, keyEquivalent: "")
-        displayItem.submenu = displayMenu
-        menu.addItem(displayItem)
-
-        let placementMenu = NSMenu()
-        for (title, placement) in [("左下", ShelfPlacement.leftBottom),
-                                   ("右下", .rightBottom),
-                                   ("ドラッグ位置の近く", .nearDrag)] {
-            let choice = NSMenuItem(title: title, action: #selector(selectPlacement(_:)), keyEquivalent: "")
-            choice.representedObject = placement.rawValue
-            choice.target = self
-            placementMenu.addItem(choice)
-            placementItems[placement] = choice
-        }
-        let placementItem = NSMenuItem(title: "棚の位置", action: nil, keyEquivalent: "")
-        placementItem.submenu = placementMenu
-        menu.addItem(placementItem)
-
+        let visibilityItem = NSMenuItem(title: "棚を表示", action: #selector(toggleShelf), keyEquivalent: "")
+        menu.addItem(visibilityItem)
+        self.visibilityItem = visibilityItem
         menu.addItem(.separator())
-        let permissionItem = NSMenuItem(title: "入力監視の権限: 確認中", action: #selector(requestInputAccess), keyEquivalent: "")
-        menu.addItem(permissionItem)
-        self.permissionItem = permissionItem
-        let modeItem = NSMenuItem(title: "ドラッグ検知: 確認中", action: nil, keyEquivalent: "")
-        modeItem.isEnabled = false
-        menu.addItem(modeItem)
-        let loginItem = NSMenuItem(title: "ログイン時に起動", action: #selector(toggleLoginItem), keyEquivalent: "")
-        menu.addItem(loginItem)
-        self.loginItem = loginItem
+        let countItem = NSMenuItem(title: "一時置き: 0 件", action: nil, keyEquivalent: "")
+        countItem.isEnabled = false
+        menu.addItem(countItem)
+        self.countItem = countItem
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "終了", action: #selector(quit), keyEquivalent: "q"))
         for entry in menu.items where entry.action != nil { entry.target = self }
         item.menu = menu
         statusItem = item
-        self.modeItem = modeItem
+        item.isVisible = UserDefaults.standard.object(forKey: menuBarVisibilityKey) as? Bool ?? true
+        shelf.onLoginToggle = { [weak self] in self?.toggleLoginItem() }
+        shelf.onMenuBarVisibilityChange = { [weak self] in self?.setMenuBarVisibility($0) }
+        shelf.onOpenInputSettings = { [weak self] in self?.requestInputAccess() }
+        shelf.managementStatusProvider = { [weak self] in self?.managementSystemStatus() ??
+            ShelfManagementWindow.SystemStatus(inputGranted: false, detectionText: "確認中",
+                                               loginText: "確認中", loginEnabled: false,
+                                               loginAvailable: false, menuBarVisible: true)
+        }
 
         let monitor = GlobalDragMonitor { [weak self] kind, point in
             self?.receive(kind, at: point)
@@ -107,6 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             shelf.show(near: NSEvent.mouseLocation)
         } else if !CommandLine.arguments.contains("--login-start") {
             shelf.openManagement()
+            shelf.showRestoredItemsIfNeeded()
         }
         DispatchQueue.main.async { [weak self] in
             self?.requestInputAccessIfNeeded()
@@ -191,22 +167,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         shelf.hide()
     }
 
+    @objc private func toggleShelf() {
+        if shelf.isVisible { hideShelf() } else { showShelf() }
+        updateMenuState()
+    }
+
     @objc private func openManagement() {
         shelf.openManagement()
-    }
-
-    @objc private func selectDisplayMode(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String,
-              let mode = ShelfDisplayMode(rawValue: raw) else { return }
-        shelf.setDisplayMode(mode)
-        updateMenuState()
-    }
-
-    @objc private func selectPlacement(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String,
-              let placement = ShelfPlacement(rawValue: raw) else { return }
-        shelf.setPlacement(placement)
-        updateMenuState()
     }
 
     @objc private func requestInputAccess() {
@@ -236,38 +203,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func updateMonitorStatus() {
-        let permissionGranted = CGPreflightListenEventAccess()
-        permissionItem?.title = permissionGranted
-            ? "入力監視の権限: 許可済み"
-            : "入力監視の権限: 未許可（設定を開く）"
-        permissionItem?.isEnabled = !permissionGranted
-        if monitor?.isRunning != true {
-            modeItem?.title = "ドラッグ検知: 停止中"
-        } else if monitor?.mode == .eventTap {
-            modeItem?.title = "ドラッグ検知: 動作中（入力監視を使用）"
-        } else {
-            modeItem?.title = "ドラッグ検知: 動作中（入力監視なし）"
-        }
+        shelf.refreshManagementSystemStatus()
     }
 
     private func updateMenuState() {
-        updateMonitorStatus()
-        for (mode, item) in displayItems { item.state = mode == shelf.displayMode ? .on : .off }
-        for (placement, item) in placementItems { item.state = placement == shelf.placement ? .on : .off }
+        visibilityItem?.title = shelf.isVisible ? "棚を隠す" : "棚を表示"
+        countItem?.title = "一時置き: \(shelf.model.files.count) 件"
+        shelf.refreshManagementSystemStatus()
+    }
+
+    private func managementSystemStatus() -> ShelfManagementWindow.SystemStatus {
         let status = loginService.status
-        loginItem?.state = status == .enabled ? .on : .off
+        let loginText: String
         switch status {
         case .enabled:
-            loginItem?.title = "ログイン時に起動"
+            loginText = "有効"
         case .requiresApproval:
-            loginItem?.title = "ログイン時に起動（システム設定で承認待ち）"
+            loginText = "システム設定で承認待ち"
         case .notFound:
-            loginItem?.title = "ログイン時に起動（利用不可）"
+            loginText = "未登録（有効にすると登録を試みます）"
         case .notRegistered:
-            loginItem?.title = "ログイン時に起動"
+            loginText = "無効"
         @unknown default:
-            loginItem?.title = "ログイン時に起動（状態不明）"
+            loginText = "状態不明"
         }
+        let detectionText: String
+        if monitor?.isRunning != true {
+            detectionText = "停止中"
+        } else if monitor?.mode == .eventTap {
+            detectionText = "動作中（入力監視を使用）"
+        } else {
+            detectionText = "動作中（入力監視なし）"
+        }
+        return ShelfManagementWindow.SystemStatus(
+            inputGranted: CGPreflightListenEventAccess(), detectionText: detectionText,
+            loginText: loginText, loginEnabled: status == .enabled || status == .requiresApproval,
+            loginAvailable: true, menuBarVisible: statusItem?.isVisible ?? true
+        )
+    }
+
+    private func setMenuBarVisibility(_ visible: Bool) {
+        statusItem?.isVisible = visible
+        UserDefaults.standard.set(visible, forKey: menuBarVisibilityKey)
+        shelf.refreshManagementSystemStatus()
     }
 
     @objc private func toggleLoginItem() {

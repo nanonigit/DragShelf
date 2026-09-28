@@ -43,3 +43,11 @@ Record pass/fail and any app-specific deviations here after the physical checks.
 - `bash script/package_release.sh 0.1.0`: release build and nested code-signature verification passed; ZIP integrity passed. Final `DragShelf-0.1.0-macos-arm64.zip` SHA-256: `05f572ca4884cafd46ba0af91661a37255c6c14ea83d4cdef04ac1f2d2e4f166`.
 - `spctl -a -vv` still rejects the ad-hoc-signed bundle. User approved release with this experimental unsigned-distribution warning; Gatekeeper is not bypassed by the installer.
 - Copied the verified bundle to `/Applications/DragShelf.app` and launched it from that path. The running process path and bundle version (`0.1.0`) were checked; the development `dist` process was stopped.
+
+## 2026-09-28 — settings, history, and menu-bar visibility candidate
+
+- `swift test`: 12 passed, 0 failed, including bookmark/path restoration and oldest-first history eviction. These are unit tests; a real Finder file was not parked for a restart trial.
+- Built the v0.1.0 release bundle and installed it at `/Applications/DragShelf.app`; `codesign --verify --deep --strict` passed there. Its ad-hoc signature still fails Gatekeeper assessment.
+- The native management UI showed **一時置き** and **設定** tabs, selectable 25-item limit, launch status, and actual input-monitoring state. Input Monitoring still reported "アプリ側では未許可" and AppKit fallback, despite the user's System Settings switch being ON; this remains unresolved in the ad-hoc build.
+- The **メニューバーアイコン** checkbox was switched off (accessibility value 0); the persisted preference became `showMenuBarIcon = 0`. Opening `/Applications/DragShelf.app` again brought management forward with the checkbox still off. Switching it on returned the checkbox to value 1. This verifies a recovery path from the hidden icon.
+- Current ZIP SHA-256: `8fa20f0c23a14e0688f681cd19b38f43c210077fdbe0b338390a5bb1836a34de`. Release publication and Homebrew installation remain to be verified separately.

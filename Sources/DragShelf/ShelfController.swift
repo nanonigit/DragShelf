@@ -12,6 +12,10 @@ final class ShelfController {
     private var management: ShelfManagementWindow?
     private var lastScreen: NSScreen?
     private var lastPointer = NSPoint.zero
+    var onLoginToggle: (() -> Void)?
+    var onMenuBarVisibilityChange: ((Bool) -> Void)?
+    var onOpenInputSettings: (() -> Void)?
+    var managementStatusProvider: (() -> ShelfManagementWindow.SystemStatus)?
 
     private(set) var displayMode: ShelfDisplayMode {
         didSet { UserDefaults.standard.set(displayMode.rawValue, forKey: "shelfDisplayMode") }
@@ -52,7 +56,7 @@ final class ShelfController {
         model.didChange = { [weak self] in self?.refresh() }
         previews.didUpdate = { [weak self] in
             self?.dropView.needsDisplay = true
-            self?.management?.refresh()
+            self?.management?.refreshFiles()
         }
     }
 
@@ -62,6 +66,7 @@ final class ShelfController {
         lastPointer = point
         updatePanelSize(for: screen)
         position(on: screen)
+        panel.level = model.files.isEmpty ? .floating : .statusBar
         panel.orderFrontRegardless()
         log.info("Shelf shown at x=\(self.panel.frame.minX) y=\(self.panel.frame.minY) width=\(self.panel.frame.width) height=\(self.panel.frame.height)")
     }
@@ -72,6 +77,10 @@ final class ShelfController {
 
     func hideIfEmpty() {
         if model.files.isEmpty { hide() }
+    }
+
+    func showRestoredItemsIfNeeded() {
+        if !model.files.isEmpty { show(near: NSEvent.mouseLocation) }
     }
 
     func setDisplayMode(_ mode: ShelfDisplayMode) {
@@ -85,13 +94,23 @@ final class ShelfController {
         guard placement != value else { return }
         placement = value
         position(on: lastScreen ?? NSScreen.main)
+        management?.refresh(displayMode: displayMode, placement: placement,
+                            transparencyPercent: transparencyPercent)
     }
 
     func openManagement() {
         if management == nil {
             let newManagement = ShelfManagementWindow(model: model, previews: previews,
+                                                      displayMode: displayMode, placement: placement,
                                                       transparencyPercent: transparencyPercent)
+            newManagement.onDisplayModeChange = { [weak self] in self?.setDisplayMode($0) }
+            newManagement.onPlacementChange = { [weak self] in self?.setPlacement($0) }
             newManagement.onTransparencyChange = { [weak self] in self?.setTransparency($0) }
+            newManagement.onHistoryLimitChange = { [weak self] in self?.model.setMaximumItems($0) }
+            newManagement.onLoginToggle = { [weak self] in self?.onLoginToggle?() }
+            newManagement.onMenuBarVisibilityChange = { [weak self] in self?.onMenuBarVisibilityChange?($0) }
+            newManagement.onOpenInputSettings = { [weak self] in self?.onOpenInputSettings?() }
+            newManagement.systemStatusProvider = managementStatusProvider
             management = newManagement
         }
         management?.show()
@@ -100,13 +119,20 @@ final class ShelfController {
     func setTransparency(_ percent: Double) {
         transparencyPercent = min(60, max(0, percent))
         panel.alphaValue = 1 - transparencyPercent / 100
+        management?.refresh(displayMode: displayMode, placement: placement,
+                            transparencyPercent: transparencyPercent)
+    }
+
+    func refreshManagementSystemStatus() {
+        management?.refreshSystemStatus()
     }
 
     private func refresh() {
         previews.retainOnly(model.files)
         updatePanelSize(for: lastScreen ?? NSScreen.main)
         panel.level = model.files.isEmpty ? .floating : .statusBar
-        management?.refresh()
+        management?.refresh(displayMode: displayMode, placement: placement,
+                            transparencyPercent: transparencyPercent)
         position(on: lastScreen ?? NSScreen.main)
         if model.files.isEmpty {
             hide()

@@ -80,13 +80,16 @@ final class ShelfDropView: NSView, NSDraggingSource {
 
     private func drawItem(_ url: URL, in frame: NSRect) {
         let image = previews?.image(for: url) ?? NSWorkspace.shared.icon(forFile: url.path)
+        let exists = FileManager.default.fileExists(atPath: url.path)
+        let title = exists ? url.lastPathComponent : "⚠︎ \(url.lastPathComponent)"
         switch displayMode {
         case .list:
             let imageFrame = NSRect(x: frame.minX + 5, y: frame.minY + 7, width: 34, height: 34)
             drawImage(image, fitting: imageFrame)
-            drawText(url.lastPathComponent,
+            drawText(title,
                      in: NSRect(x: frame.minX + 43, y: frame.minY + 14,
-                                width: frame.width - 72, height: 22), size: 11)
+                                width: frame.width - 72, height: 22), size: 11,
+                     color: exists ? .labelColor : .secondaryLabelColor)
             drawRemoveButton(in: removeRect(for: frame))
         case .icons:
             let background = frame.insetBy(dx: 4, dy: 4)
@@ -94,10 +97,11 @@ final class ShelfDropView: NSView, NSDraggingSource {
             NSBezierPath(roundedRect: background, xRadius: 9, yRadius: 9).fill()
             drawImage(image, fitting: NSRect(x: frame.minX + 15, y: frame.minY + 10,
                                              width: 118, height: 101))
-            drawText(url.lastPathComponent,
+            drawText(title,
                      in: NSRect(x: frame.minX + 8, y: frame.minY + 117,
                                 width: frame.width - 16, height: 22), size: 11,
-                     alignment: .center)
+                     alignment: .center,
+                     color: exists ? .labelColor : .secondaryLabelColor)
             drawRemoveButton(in: removeRect(for: frame))
         }
     }
@@ -119,13 +123,14 @@ final class ShelfDropView: NSView, NSDraggingSource {
     }
 
     private func drawText(_ text: String, in rect: NSRect, size: CGFloat,
-                          bold: Bool = false, alignment: NSTextAlignment = .left) {
+                          bold: Bool = false, alignment: NSTextAlignment = .left,
+                          color: NSColor = .labelColor) {
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingMiddle
         paragraph.alignment = alignment
         let attrs: [NSAttributedString.Key: Any] = [
             .font: bold ? NSFont.boldSystemFont(ofSize: size) : NSFont.systemFont(ofSize: size),
-            .foregroundColor: NSColor.labelColor,
+            .foregroundColor: color,
             .paragraphStyle: paragraph,
         ]
         (text as NSString).draw(in: rect, withAttributes: attrs)
@@ -185,6 +190,7 @@ final class ShelfDropView: NSView, NSDraggingSource {
             model.remove(at: index)
             return
         }
+        guard FileManager.default.fileExists(atPath: model.files[index].path) else { return }
         pendingIndex = index
         mouseDownEvent = event
         mouseDownPoint = point
@@ -196,6 +202,11 @@ final class ShelfDropView: NSView, NSDraggingSource {
         let point = convert(event.locationInWindow, from: nil)
         guard hypot(point.x - mouseDownPoint.x, point.y - mouseDownPoint.y) >= 4 else { return }
         let url = model.files[index]
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            pendingIndex = nil
+            self.mouseDownEvent = nil
+            return
+        }
         pendingIndex = nil
         self.mouseDownEvent = nil
 
