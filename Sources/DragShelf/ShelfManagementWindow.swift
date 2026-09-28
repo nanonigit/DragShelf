@@ -66,15 +66,16 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
             tabs.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -12),
         ])
 
-        let filesTab = NSTabViewItem(identifier: "files")
-        filesTab.label = "一時置き"
-        filesTab.view = makeFilesView()
-        tabs.addTabViewItem(filesTab)
-
         let settingsTab = NSTabViewItem(identifier: "settings")
         settingsTab.label = "設定"
         settingsTab.view = makeSettingsView()
         tabs.addTabViewItem(settingsTab)
+
+        let filesTab = NSTabViewItem(identifier: "files")
+        filesTab.label = "一時置き"
+        filesTab.view = makeFilesView()
+        tabs.addTabViewItem(filesTab)
+        tabs.selectTabViewItem(settingsTab)
 
         refresh(displayMode: displayMode, placement: placement,
                 transparencyPercent: transparencyPercent)

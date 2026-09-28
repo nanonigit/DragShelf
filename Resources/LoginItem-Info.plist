@@ -5,7 +5,7 @@
   <key>CFBundleExecutable</key><string>DragShelfLoginItem</string>
   <key>CFBundleIdentifier</key><string>com.github.nanonigit.DragShelf.LoginItem</string>
   <key>CFBundleName</key><string>DragShelf Login Item</string>
-  <key>CFBundleShortVersionString</key><string>0.1.0</string>
+  <key>CFBundleShortVersionString</key><string>0.1.1</string>
   <key>CFBundleVersion</key><string>1</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>

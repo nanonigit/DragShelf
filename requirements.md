@@ -36,6 +36,7 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 
 - Keep the menu-bar menu short: open management, show/hide shelf, truthful drag/permission status, and quit. Move persistent choices (display mode, placement, transparency, login launch, and history size) into the management window. The permission status must still offer a clear path to System Settings when permission is absent.
 - Let the user show or hide the menu-bar icon from Settings, retain the choice across launches, and keep a reliable way back through the Applications/Dock launcher or shelf gear. Hiding the icon must not stop drag monitoring or remove the shelf.
+- Put the Settings tab to the left of Parked Items and select Settings on a fresh management-window launch.
 - Persist parked file references locally so the shelf contents reappear after app restart. Do not copy file bytes or change the originals. Let the user choose the maximum retained item count in management; when exceeded, remove oldest references first, without deleting source files. Explain that moved/deleted files may no longer be available.
 
 - Validate full-screen and Stage Manager behavior across supported macOS versions.

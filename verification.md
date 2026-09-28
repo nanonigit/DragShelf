@@ -52,3 +52,10 @@ Record pass/fail and any app-specific deviations here after the physical checks.
 - The **メニューバーアイコン** checkbox was switched off (accessibility value 0); the persisted preference became `showMenuBarIcon = 0`. Opening `/Applications/DragShelf.app` again brought management forward with the checkbox still off. Switching it on returned the checkbox to value 1. This verifies a recovery path from the hidden icon.
 - Current ZIP SHA-256: `8fa20f0c23a14e0688f681cd19b38f43c210077fdbe0b338390a5bb1836a34de`. Release publication and Homebrew installation remain to be verified separately.
 - After the user removed and re-added the Input Monitoring grant for the final `/Applications/DragShelf.app` build, the native settings UI showed **アプリ側で許可済み** and **動作中（入力監視を使用）**. This confirms the current installed build can use the passive event tap. It does not prove that future ad-hoc-signed updates will retain permission.
+
+## 2026-09-28 — v0.1.1 management tab order
+
+- `swift test`: 12 passed, 0 failed. Release bundle build and signature verification passed; Gatekeeper still rejects this ad-hoc-signed build.
+- Installed v0.1.1 at `/Applications/DragShelf.app` and launched it. Native accessibility inspection showed **設定** as the first tab and selected (`Value: 1`), with **一時置き** second (`Value: 0`). Selecting the right tab showed the empty shelf list, then Settings was selected again.
+- Input Monitoring reverted to **アプリ側では未許可** after rebuilding/signing v0.1.1, as warned for ad-hoc signing. The AppKit fallback was running. Only the user can re-grant that macOS permission; this does not affect the tab-order check.
+- ZIP SHA-256: `e77c0ea0892ff9ebe32facf7a74941df6167f9d89b0f257bc3dd509665775cb6`. A real-file restart test, full-screen and multi-display checks remain open.

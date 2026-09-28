@@ -43,6 +43,7 @@
 - [x] Add a selectable 5/10/25/50/100 item limit; trim oldest references without touching source files and test both addition and limit changes.
 - [x] Consolidate persistent preferences and permission/login controls in management; leave only immediate actions and concise status in the menu bar.
 - [x] Add a persisted menu-bar icon visibility toggle in Settings and verify that normal app reopening restores access to Settings when the icon is hidden.
+- [x] Put Settings first and select it on initial management opening; verify both tab order and selection in the installed app.
 - [x] Mark missing source files and prevent dragging a missing URL out.
 - [ ] Rebuild `/Applications/DragShelf.app` and verify the management settings and restored items before publishing release/tap. (Build/install and UI checked; real-file restoration still needs a physical drag.)
 
