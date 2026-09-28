@@ -20,7 +20,7 @@ mkdir -p "$ARCHIVE_DIR"
 ARCHITECTURE="$(uname -m)"
 ARCHIVE="$ARCHIVE_DIR/DragShelf-$VERSION-macos-$ARCHITECTURE.zip"
 ditto -c -k --sequesterRsrc --keepParent "$ROOT_DIR/dist/DragShelf.app" "$ARCHIVE"
-shasum -a 256 "$ARCHIVE" > "$ARCHIVE.sha256"
+(cd "$ARCHIVE_DIR" && shasum -a 256 "$(basename "$ARCHIVE")") > "$ARCHIVE.sha256"
 codesign --verify --deep --strict "$ROOT_DIR/dist/DragShelf.app"
 spctl -a -vv "$ROOT_DIR/dist/DragShelf.app" || true
 echo "$ARCHIVE"
