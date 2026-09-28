@@ -1,0 +1,44 @@
+# DragShelf implementation tasks
+
+## Phase 1
+
+- [x] Record requirements and design before implementation.
+- [x] Build a pure detection state machine and behavioral unit tests.
+- [x] Build a passive event monitor and drag-pasteboard metadata probe.
+- [x] Create a nonactivating shelf panel registered as a drop destination.
+- [x] Build and launch a real `.app` bundle.
+- [x] Request Input Monitoring through macOS once at launch if not yet granted; retain menu retry and monitor refresh.
+- [x] Verify the build and unit tests and stage the updated app without quitting the running shelf.
+- [ ] Observe the macOS consent prompt and approval on a subsequent app launch; confirm monitor transitions to the event tap.
+- [ ] Manually verify Finder drag start, reveal, same-drag drop, and no source move.
+- [ ] Exercise negative and permission-denied cases; record observations in `verification.md`.
+
+## Phase 2
+
+- [x] Park and render multiple file/folder entries in the initial list.
+- [x] Add asynchronous Quick Look thumbnails with a safe icon fallback.
+- [x] Add persistent list/icon views, scrolling, and layout hit-testing tests.
+- [x] Narrow the shelf to 160 points, change icon view to one column, remove the title, add a gear to open management, and add a persisted transparency slider.
+- [x] Add persistent left-bottom/right-bottom/near-drag placement with geometry tests.
+- [x] Hide the panel on last-item removal; preserve an empty in-progress drop target.
+- [x] Replace ambiguous menu status with permission and active-detection facts; add show/hide and management actions.
+- [ ] Make the permission menu open System Settings when ungranted, and verify the click produces visible feedback.
+- [x] Open a management window from normal app launch and reopen, with per-item removal.
+- [x] Add opt-in login launch through a nested helper, bundle signing, and truthful status/error UI.
+- [x] Install a generated app icon and verify it in the packaged app.
+- [ ] Drag a parked file to Finder and an accepting app.
+- [ ] Verify Spaces, full screen, and multiple displays.
+
+## Distribution
+
+- [ ] Initialize a dedicated Git repository and publish it publicly on GitHub.
+- [ ] Write and verify a bilingual English/Japanese README and release limitations.
+- [ ] Build and inspect a versioned release archive, checksum, and signing/Gatekeeper status.
+- [ ] Publish a GitHub Release with honest installation caveats.
+- [ ] Publish a dedicated Homebrew tap and validate its cask locally.
+
+## Phase 3
+
+- [ ] Add promised files, images, text, and URLs one at a time with integration checks.
+- [ ] Add preferences, accessibility, and launch behavior.
+- [ ] Perform a clean-build and real interaction pass before release.
