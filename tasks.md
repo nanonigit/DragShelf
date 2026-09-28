@@ -31,9 +31,9 @@
 
 ## Distribution
 
-- [ ] Initialize a dedicated Git repository and publish it publicly on GitHub.
-- [ ] Write and verify a bilingual English/Japanese README and release limitations.
-- [ ] Build and inspect a versioned release archive, checksum, and signing/Gatekeeper status.
+- [x] Initialize a dedicated Git repository and publish it publicly on GitHub.
+- [x] Write and verify a bilingual English/Japanese README and release limitations.
+- [x] Build and inspect a versioned release archive, checksum, and signing/Gatekeeper status.
 - [ ] Publish a GitHub Release with honest installation caveats.
 - [ ] Publish a dedicated Homebrew tap and validate its cask locally.
 
