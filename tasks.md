@@ -44,6 +44,8 @@
 - [x] Consolidate persistent preferences and permission/login controls in management; leave only immediate actions and concise status in the menu bar.
 - [x] Add a persisted menu-bar icon visibility toggle in Settings and verify that normal app reopening restores access to Settings when the icon is hidden.
 - [x] Put Settings first and select it on initial management opening; verify both tab order and selection in the installed app.
+- [x] Add and persist a Dock icon visibility checkbox in Settings, handle AppKit policy-switch failures, and test the management recovery path while hidden.
+- [x] Test that neither setting can hide the last visible icon, including a corrupted both-hidden stored preference.
 - [x] Mark missing source files and prevent dragging a missing URL out.
 - [ ] Rebuild `/Applications/DragShelf.app` and verify the management settings and restored items before publishing release/tap. (Build/install and UI checked; real-file restoration still needs a physical drag.)
 

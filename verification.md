@@ -61,3 +61,11 @@ Record pass/fail and any app-specific deviations here after the physical checks.
 - ZIP SHA-256: `e77c0ea0892ff9ebe32facf7a74941df6167f9d89b0f257bc3dd509665775cb6`. A real-file restart test, full-screen and multi-display checks remain open.
 - Published [v0.1.1](https://github.com/nanonigit/DragShelf/releases/tag/v0.1.1) with the ZIP and SHA-256 sidecar. The dedicated tap was renamed to [homebrew-DragShelf](https://github.com/nanonigit/homebrew-DragShelf); `brew tap nanonigit/dragshelf`, `brew audit --cask nanonigit/dragshelf/dragshelf`, and `brew fetch --cask nanonigit/dragshelf/dragshelf` succeeded.
 - An isolated Homebrew install to `/Users/naoki/Documents/Wav2Vec2/DragShelf-homebrew-test-apps` succeeded with v0.1.1 and valid ad-hoc signature. The test-only copy was uninstalled from that directory. `/Applications/DragShelf.app` remained installed and running at v0.1.1 throughout this Homebrew check.
+
+## 2026-09-28 — v0.1.2 Dock visibility
+
+- `swift test`: 16 passed, 0 failed. Four new tests cover default visibility, refusal to hide the last icon, preference restoration, and normalization of corrupted both-hidden preferences.
+- Release build and `codesign --verify --deep --strict` passed. The archive passed `unzip -t`, and the main executable is arm64. `spctl` rejects the ad-hoc-signed bundle as expected; it is not notarized.
+- Installed `/Applications/DragShelf.app` v0.1.2. The native management UI showed the Dock checkbox disabled while the menu-bar icon was hidden. After showing the menu-bar icon, hiding Dock updated the checkbox to off and disabled the menu-bar checkbox. The management window remained usable in this state.
+- Quit and reopened the installed app while Dock was hidden. Settings opened again with Dock off, menu-bar on, and the last-icon guard intact. Restored the user's prior Dock-on/menu-bar-off settings after the check.
+- This verifies the native preference and recovery UI. A macOS Dock screenshot and physical file drag were not collected in this pass. A future ad-hoc update may require re-granting Input Monitoring.

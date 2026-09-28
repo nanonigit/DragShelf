@@ -11,7 +11,12 @@ enum DragShelfMain {
 
     static func main() {
         let app = NSApplication.shared
-        app.setActivationPolicy(.regular)
+        let presence = AppPresence.restored(from: .standard)
+        let policy: NSApplication.ActivationPolicy = presence.dockVisible ? .regular : .accessory
+        if !app.setActivationPolicy(policy) {
+            _ = app.setActivationPolicy(.regular)
+            UserDefaults.standard.set(true, forKey: AppPresence.dockKey)
+        }
         let delegate = AppDelegate()
         self.delegate = delegate
         app.delegate = delegate
@@ -21,7 +26,6 @@ enum DragShelfMain {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    private let menuBarVisibilityKey = "showMenuBarIcon"
     private let log = Logger(subsystem: "dev.local.DragShelf", category: "Detection")
     private let shelf = ShelfController()
     private let probe = DragPasteboardProbe()
@@ -56,14 +60,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for entry in menu.items where entry.action != nil { entry.target = self }
         item.menu = menu
         statusItem = item
-        item.isVisible = UserDefaults.standard.object(forKey: menuBarVisibilityKey) as? Bool ?? true
+        item.isVisible = AppPresence.restored(from: .standard).menuBarVisible
         shelf.onLoginToggle = { [weak self] in self?.toggleLoginItem() }
         shelf.onMenuBarVisibilityChange = { [weak self] in self?.setMenuBarVisibility($0) }
+        shelf.onDockVisibilityChange = { [weak self] in self?.setDockVisibility($0) }
         shelf.onOpenInputSettings = { [weak self] in self?.requestInputAccess() }
         shelf.managementStatusProvider = { [weak self] in self?.managementSystemStatus() ??
             ShelfManagementWindow.SystemStatus(inputGranted: false, detectionText: "確認中",
                                                loginText: "確認中", loginEnabled: false,
-                                               loginAvailable: false, menuBarVisible: true)
+                                               loginAvailable: false, menuBarVisible: true,
+                                               dockVisible: true)
         }
 
         let monitor = GlobalDragMonitor { [weak self] kind, point in
@@ -238,13 +244,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return ShelfManagementWindow.SystemStatus(
             inputGranted: CGPreflightListenEventAccess(), detectionText: detectionText,
             loginText: loginText, loginEnabled: status == .enabled || status == .requiresApproval,
-            loginAvailable: true, menuBarVisible: statusItem?.isVisible ?? true
+            loginAvailable: true, menuBarVisible: statusItem?.isVisible ?? true,
+            dockVisible: NSApp.activationPolicy() == .regular
         )
     }
 
     private func setMenuBarVisibility(_ visible: Bool) {
-        statusItem?.isVisible = visible
-        UserDefaults.standard.set(visible, forKey: menuBarVisibilityKey)
+        guard let item = statusItem,
+              let next = currentPresence.changingMenuBarVisibility(to: visible) else {
+            shelf.refreshManagementSystemStatus()
+            return
+        }
+        item.isVisible = visible
+        next.save(to: .standard)
+        shelf.refreshManagementSystemStatus()
+    }
+
+    private var currentPresence: AppPresence {
+        AppPresence(dockVisible: NSApp.activationPolicy() == .regular,
+                    menuBarVisible: statusItem?.isVisible ?? false)
+    }
+
+    private func setDockVisibility(_ visible: Bool) {
+        guard let next = currentPresence.changingDockVisibility(to: visible) else {
+            shelf.refreshManagementSystemStatus()
+            return
+        }
+        let policy: NSApplication.ActivationPolicy = visible ? .regular : .accessory
+        guard NSApp.setActivationPolicy(policy), NSApp.activationPolicy() == policy else {
+            let alert = NSAlert()
+            alert.messageText = "Dock アイコンの表示を変更できませんでした"
+            alert.informativeText = "アプリを再起動してから、もう一度お試しください。"
+            alert.runModal()
+            shelf.refreshManagementSystemStatus()
+            return
+        }
+        next.save(to: .standard)
+        shelf.openManagement()
         shelf.refreshManagementSystemStatus()
     }
 

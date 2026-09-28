@@ -14,6 +14,7 @@ final class ShelfController {
     private var lastPointer = NSPoint.zero
     var onLoginToggle: (() -> Void)?
     var onMenuBarVisibilityChange: ((Bool) -> Void)?
+    var onDockVisibilityChange: ((Bool) -> Void)?
     var onOpenInputSettings: (() -> Void)?
     var managementStatusProvider: (() -> ShelfManagementWindow.SystemStatus)?
 
@@ -109,6 +110,7 @@ final class ShelfController {
             newManagement.onHistoryLimitChange = { [weak self] in self?.model.setMaximumItems($0) }
             newManagement.onLoginToggle = { [weak self] in self?.onLoginToggle?() }
             newManagement.onMenuBarVisibilityChange = { [weak self] in self?.onMenuBarVisibilityChange?($0) }
+            newManagement.onDockVisibilityChange = { [weak self] in self?.onDockVisibilityChange?($0) }
             newManagement.onOpenInputSettings = { [weak self] in self?.onOpenInputSettings?() }
             newManagement.systemStatusProvider = managementStatusProvider
             management = newManagement

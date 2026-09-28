@@ -10,6 +10,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         let loginEnabled: Bool
         let loginAvailable: Bool
         let menuBarVisible: Bool
+        let dockVisible: Bool
     }
 
     private let model: ShelfModel
@@ -25,6 +26,8 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
     private let historyPopup = NSPopUpButton(frame: .zero, pullsDown: false)
     private let loginCheckbox = NSButton(checkboxWithTitle: "有効にする", target: nil, action: nil)
     private let menuBarCheckbox = NSButton(checkboxWithTitle: "表示する", target: nil, action: nil)
+    private let dockCheckbox = NSButton(checkboxWithTitle: "表示する", target: nil, action: nil)
+    private let presenceNote = NSTextField(wrappingLabelWithString: "")
     private let loginStatusLabel = NSTextField(labelWithString: "")
     private let permissionLabel = NSTextField(labelWithString: "")
     private let permissionButton = NSButton(title: "入力監視の設定を開く", target: nil, action: nil)
@@ -38,6 +41,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
     var onHistoryLimitChange: ((Int) -> Void)?
     var onLoginToggle: (() -> Void)?
     var onMenuBarVisibilityChange: ((Bool) -> Void)?
+    var onDockVisibilityChange: ((Bool) -> Void)?
     var onOpenInputSettings: (() -> Void)?
     var systemStatusProvider: (() -> SystemStatus)?
 
@@ -151,6 +155,8 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         loginCheckbox.action = #selector(toggleLogin(_:))
         menuBarCheckbox.target = self
         menuBarCheckbox.action = #selector(changeMenuBarVisibility(_:))
+        dockCheckbox.target = self
+        dockCheckbox.action = #selector(changeDockVisibility(_:))
         permissionButton.target = self
         permissionButton.action = #selector(openInputSettings(_:))
 
@@ -159,11 +165,10 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         addRow("棚の位置", control: placementPopup, to: stack)
         addRow("棚の透明度", control: transparencySlider, to: stack)
         addRow("メニューバーアイコン", control: menuBarCheckbox, to: stack)
-        let menuBarNote = NSTextField(wrappingLabelWithString:
-            "非表示でもアプリケーションや Dock から起動すると、この管理画面を開けます。")
-        menuBarNote.textColor = .secondaryLabelColor
-        stack.addArrangedSubview(menuBarNote)
-        menuBarNote.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        addRow("Dock アイコン", control: dockCheckbox, to: stack)
+        presenceNote.textColor = .secondaryLabelColor
+        stack.addArrangedSubview(presenceNote)
+        presenceNote.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
         addHeading("履歴", to: stack)
         addRow("最大保存件数", control: historyPopup, to: stack)
         let note = NSTextField(wrappingLabelWithString: "上限を超えると古い項目から棚を外します。元のファイルは消しません。")
@@ -232,6 +237,16 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         guard let status = systemStatusProvider?() else { return }
         loginCheckbox.state = status.loginEnabled ? .on : .off
         menuBarCheckbox.state = status.menuBarVisible ? .on : .off
+        dockCheckbox.state = status.dockVisible ? .on : .off
+        menuBarCheckbox.isEnabled = status.dockVisible || !status.menuBarVisible
+        dockCheckbox.isEnabled = status.menuBarVisible || !status.dockVisible
+        if !status.menuBarVisible {
+            presenceNote.stringValue = "Dock を隠すには、先にメニューバーアイコンを表示してください。"
+        } else if !status.dockVisible {
+            presenceNote.stringValue = "メニューバーを隠すには、先に Dock アイコンを表示してください。"
+        } else {
+            presenceNote.stringValue = "少なくとも一方のアイコンを表示します。アプリケーションからも管理画面を開けます。"
+        }
         loginCheckbox.isEnabled = status.loginAvailable
         loginStatusLabel.stringValue = status.loginText
         permissionLabel.stringValue = status.inputGranted ? "アプリ側で許可済み" : "アプリ側では未許可"
@@ -297,6 +312,9 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
     @objc private func toggleLogin(_ sender: NSButton) { onLoginToggle?() }
     @objc private func changeMenuBarVisibility(_ sender: NSButton) {
         onMenuBarVisibilityChange?(sender.state == .on)
+    }
+    @objc private func changeDockVisibility(_ sender: NSButton) {
+        onDockVisibilityChange?(sender.state == .on)
     }
     @objc private func openInputSettings(_ sender: NSButton) { onOpenInputSettings?() }
 }
