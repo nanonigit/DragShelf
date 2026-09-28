@@ -74,3 +74,4 @@ An original square app icon is packaged as `icns` and referenced by `CFBundleIco
 ## Distribution
 
 DragShelf is an independent public repository. A release script builds both Swift executables in release configuration, stages a versioned `.app`, signs its nested helper and main bundle consistently, checks the bundle, and creates a zip and SHA-256 checksum. Without a Developer ID identity this signature is ad hoc: the GitHub Release and tap must label that limitation plainly, and must not disable Gatekeeper automatically. The Homebrew tap references the immutable release asset URL and verified checksum. English and Japanese README sections explain installation and Input Monitoring.
+The first binary is built on Apple Silicon and contains arm64 executables only; its archive name and tap dependency declare that architecture explicitly.

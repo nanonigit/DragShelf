@@ -22,7 +22,7 @@
 - [x] Add persistent left-bottom/right-bottom/near-drag placement with geometry tests.
 - [x] Hide the panel on last-item removal; preserve an empty in-progress drop target.
 - [x] Replace ambiguous menu status with permission and active-detection facts; add show/hide and management actions.
-- [ ] Make the permission menu open System Settings when ungranted, and verify the click produces visible feedback.
+- [ ] Make the permission menu open System Settings when ungranted, and verify the click produces visible feedback. (Code built; direct click still needs manual confirmation.)
 - [x] Open a management window from normal app launch and reopen, with per-item removal.
 - [x] Add opt-in login launch through a nested helper, bundle signing, and truthful status/error UI.
 - [x] Install a generated app icon and verify it in the packaged app.

@@ -17,7 +17,8 @@ fi
 BUILD_CONFIGURATION=release "$ROOT_DIR/script/build_and_run.sh" --build-only
 ARCHIVE_DIR="$ROOT_DIR/releases"
 mkdir -p "$ARCHIVE_DIR"
-ARCHIVE="$ARCHIVE_DIR/DragShelf-$VERSION-macos.zip"
+ARCHITECTURE="$(uname -m)"
+ARCHIVE="$ARCHIVE_DIR/DragShelf-$VERSION-macos-$ARCHITECTURE.zip"
 ditto -c -k --sequesterRsrc --keepParent "$ROOT_DIR/dist/DragShelf.app" "$ARCHIVE"
 shasum -a 256 "$ARCHIVE" > "$ARCHIVE.sha256"
 codesign --verify --deep --strict "$ROOT_DIR/dist/DragShelf.app"

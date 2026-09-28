@@ -34,3 +34,11 @@ Record pass/fail and any app-specific deviations here after the physical checks.
 - `codesign -dvvv` reports `Signature=adhoc` and no TeamIdentifier. `spctl -a -vv` rejects the bundle. This is **not** a notarized, Gatekeeper-approved build.
 - Earlier running build was checked visually: management appeared on launch; list/icon selection changed shelf content; an MP3 preview appeared. The new 160-point header, gear, transparency slider, and System Settings permission action are built but **not yet checked in a restarted app** because the currently parked item would be lost.
 - Manual permission approval, outgoing drag, full-screen/Spaces, multiple displays, login-item registration, and Gatekeeper override remain unverified.
+
+## 2026-09-28 — v0.1.0 publication checks
+
+- User approved restarting the app; the previous in-memory shelf items were discarded as expected. A normal launch displayed the management window with an empty-item message and a transparency slider (visible via the macOS accessibility tree). Changing and persisting its value still needs a hands-on check.
+- The status-item permission click and the narrow shelf/gear were not directly observable through the available computer-use surface and remain manual UI checks. Do not infer success solely from compilation.
+- `swift test`: 8 passed, 0 failed. The final release archive is Apple Silicon (arm64) only: `lipo -info` reports arm64 for both executables.
+- `bash script/package_release.sh 0.1.0`: release build and nested code-signature verification passed; ZIP integrity passed. Final `DragShelf-0.1.0-macos-arm64.zip` SHA-256: `0b889e21f07725536691cca94036edc4c5a6437ad065702e0d268537969ec320`.
+- `spctl -a -vv` still rejects the ad-hoc-signed bundle. User approved release with this experimental unsigned-distribution warning; Gatekeeper is not bypassed by the installer.

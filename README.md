@@ -8,8 +8,8 @@ DragShelf は、ドラッグ中のファイルを一時的に置くための mac
 
 ### Requirements and installation
 
-- macOS 14 or later. The source build requires Xcode/Swift with Swift Package Manager.
-- Download `DragShelf-0.1.0-macos.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and move `DragShelf.app` to Applications.
+- macOS 14 or later. The v0.1.0 binary is for Apple Silicon (arm64) Macs only. The source build requires Xcode/Swift with Swift Package Manager.
+- Download `DragShelf-0.1.0-macos-arm64.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and move `DragShelf.app` to Applications.
 - Alternatively, use the dedicated tap: `brew tap nanonigit/tap && brew install --cask dragshelf` (available after the first release is published).
 
 **Distribution warning:** v0.1.0 is ad-hoc signed, not Developer ID signed or notarized. macOS Gatekeeper may block the downloaded app. Review the source and release before allowing it in **System Settings → Privacy & Security**. The Homebrew tap does not bypass Gatekeeper. If you prefer not to make a security exception, build from source or wait for a notarized release.
@@ -35,8 +35,8 @@ bash script/build_and_run.sh
 
 ### 動作環境とインストール
 
-- macOS 14 以降。ソースからのビルドには Swift Package Manager を使える Xcode/Swift が必要です。
-- [GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.1.0-macos.zip` を取得し、展開した `DragShelf.app` を「アプリケーション」へ移します。
+- macOS 14 以降。v0.1.0 の配布バイナリは Apple Silicon（arm64）Mac 専用です。ソースからのビルドには Swift Package Manager を使える Xcode/Swift が必要です。
+- [GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.1.0-macos-arm64.zip` を取得し、展開した `DragShelf.app` を「アプリケーション」へ移します。
 - 専用 tap からは `brew tap nanonigit/tap && brew install --cask dragshelf` でインストールできます（初回リリース公開後）。
 
 **配布上の注意:** v0.1.0 はアドホック署名のみで、Developer ID 署名・公証はありません。ダウンロードしたアプリは Gatekeeper に止められる場合があります。ソースと配布物を確認したうえで「システム設定 → プライバシーとセキュリティ」から許可してください。Homebrew tap は Gatekeeper を自動で回避しません。セキュリティの例外設定を避けたい場合は、ソースからビルドするか、公証済み版をお待ちください。
@@ -59,3 +59,5 @@ bash script/build_and_run.sh
 `bash script/build_and_run.sh --build-only` は動作中の棚を再起動せず `dist/DragShelf.app` を作ります。`bash script/package_release.sh 0.1.0` は `releases/` に ZIP と SHA-256 を作ります。通常起動では管理画面が開き、ログイン時起動では背後で動きます。
 
 Design and development notes / 設計・開発記録: [requirements.md](requirements.md), [design.md](design.md), [tasks.md](tasks.md), [verification.md](verification.md).
+
+License / ライセンス: [MIT](LICENSE).
