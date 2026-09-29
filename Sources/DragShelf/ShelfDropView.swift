@@ -43,8 +43,11 @@ final class ShelfDropView: NSView, NSDraggingSource {
         NSColor.separatorColor.setStroke()
         NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: 14, yRadius: 14).stroke()
 
-        NSImage(systemSymbolName: "gearshape", accessibilityDescription: "管理画面を開く")?
-            .draw(in: NSRect(x: 11, y: 10, width: 21, height: 21))
+        drawControlSymbol("gearshape.fill",
+                          description: "管理画面を開く",
+                          in: NSRect(x: 7, y: 6, width: 30, height: 30),
+                          symbolInset: 6,
+                          cornerRadius: 8)
         drawModeButton("リスト", mode: .list, rect: NSRect(x: 40, y: 7, width: 51, height: 28))
         drawModeButton("アイコン", mode: .icons, rect: NSRect(x: 95, y: 7, width: 57, height: 28))
         NSColor.separatorColor.setFill()
@@ -107,8 +110,24 @@ final class ShelfDropView: NSView, NSDraggingSource {
     }
 
     private func drawRemoveButton(in rect: NSRect) {
-        NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: "削除")?
-            .draw(in: rect)
+        drawControlSymbol("xmark", description: "棚から取り外す", in: rect,
+                          symbolInset: 5, cornerRadius: rect.width / 2)
+    }
+
+    private func drawControlSymbol(_ name: String, description: String, in rect: NSRect,
+                                   symbolInset: CGFloat, cornerRadius: CGFloat) {
+        let background = NSBezierPath(roundedRect: rect, xRadius: cornerRadius,
+                                      yRadius: cornerRadius)
+        NSColor(calibratedWhite: 0.10, alpha: 0.96).setFill()
+        background.fill()
+        NSColor.white.withAlphaComponent(0.42).setStroke()
+        background.lineWidth = 0.8
+        background.stroke()
+
+        let configuration = NSImage.SymbolConfiguration(paletteColors: [.white])
+        NSImage(systemSymbolName: name, accessibilityDescription: description)?
+            .withSymbolConfiguration(configuration)?
+            .draw(in: rect.insetBy(dx: symbolInset, dy: symbolInset))
     }
 
     private func drawImage(_ image: NSImage, fitting rect: NSRect) {
@@ -138,8 +157,8 @@ final class ShelfDropView: NSView, NSDraggingSource {
 
     private func removeRect(for frame: NSRect) -> NSRect {
         switch displayMode {
-        case .list: NSRect(x: frame.maxX - 25, y: frame.minY + 15, width: 19, height: 19)
-        case .icons: NSRect(x: frame.maxX - 28, y: frame.minY + 10, width: 19, height: 19)
+        case .list: NSRect(x: frame.maxX - 28, y: frame.minY + 13, width: 23, height: 23)
+        case .icons: NSRect(x: frame.maxX - 30, y: frame.minY + 8, width: 23, height: 23)
         }
     }
 

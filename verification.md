@@ -83,3 +83,11 @@ Record pass/fail and any app-specific deviations here after the physical checks.
 - Final ZIP SHA-256: `91402eaeefa51524cbc73265b37941b4023bc1e1209118b6ebdc47f9440985ce`. Published [v0.1.3](https://github.com/nanonigit/DragShelf/releases/tag/v0.1.3) with the ZIP and checksum; it is marked prerelease and explains signing/permission limits.
 - Updated [homebrew-DragShelf](https://github.com/nanonigit/homebrew-DragShelf) to v0.1.3. The local tap fast-forwarded, `brew audit --cask nanonigit/dragshelf/dragshelf` passed, and `brew fetch --cask nanonigit/dragshelf/dragshelf` resolved v0.1.3.
 - Final installed state: one `/Applications/DragShelf.app` v0.1.3 process, `shelfPlacement = leftBottom`, Dock icon hidden, menu-bar icon visible. Source and tap checkouts were clean before this verification note was appended.
+
+## 2026-09-29 — v0.1.4 shelf control contrast
+
+- The user's icon-mode screenshot showed a dark gear on the dark header and a dark X on a dark circular backing. Both are hard to identify at a glance.
+- Replaced their inherited symbol rendering with explicitly white SF Symbols on dark, outlined control backgrounds. The remove control grows from 19 to 23 points while retaining its existing expanded click region.
+- `swift test`: 17 passed, 0 failed. A standalone AppKit bitmap render of the configured `gearshape.fill` produced 123 white symbol pixels, checking that the palette is applied rather than rendering a dark template.
+- The v0.1.4 release build and nested app signature verified. Installed the final build at `/Applications/DragShelf.app` and launched it; the management window opened. The shelf had no parked items at that time, so X-on-file visual verification in list/icon mode remains pending. Do not describe this as a completed physical drag test.
+- Management reported Input Monitoring not granted after this ad-hoc-signed update, with the AppKit fallback active. Re-granting permission requires the user to use macOS System Settings.

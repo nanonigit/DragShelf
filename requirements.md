@@ -21,6 +21,7 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 - Show a useful content preview where macOS can generate one, with a file icon fallback. Let the user switch between compact list and larger icon views; preserve the choice across launches.
 - Keep the shelf narrow (about half its initial 320-point width); do not waste horizontal space in icon view. Remove the shelf title and provide a gear control that opens management.
 - Let the user adjust shelf transparency from management, preserve the setting, and retain enough opacity for legibility.
+- Keep the shelf's gear and per-item remove control clearly visible over dark and light previews, including at reduced shelf opacity.
 - Offer left-bottom, left-top, right-bottom, right-top, and near-drag shelf placement choices. Show exactly one shelf at the selected location, clamp it to the pointer's display, and preserve the choice across launches.
 - Prevent a second DragShelf process, including a development bundle, from showing another shelf while one instance is already running.
 - Hide the shelf immediately when the last parked item is removed with its remove control. An empty shelf revealed during an active drag must remain usable until that drag ends.

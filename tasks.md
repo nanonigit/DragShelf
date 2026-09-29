@@ -55,6 +55,8 @@
 
 ## Phase 3
 
+- [x] Increase gear and remove-control contrast on the shelf, enlarge the remove target, and install the build.
+- [ ] Visually verify both controls with parked files in icon and list modes at reduced shelf opacity.
 - [ ] Add promised files, images, text, and URLs one at a time with integration checks.
 - [ ] Add preferences, accessibility, and launch behavior.
 - [ ] Perform a clean-build and real interaction pass before release.

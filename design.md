@@ -61,6 +61,8 @@ After seeing the first running build, the user requested approximately half the 
 
 The shelf panel stays separate from a regular management window. The management window shows all parked files with per-item removal. The app has a Dock/Application icon and a menu-bar icon: a user launch or reopen from Applications/launcher opens management, while the menu bar explicitly offers **棚を表示**, **棚を隠す**, and **管理画面を開く**. Hiding the shelf is temporary; the next supported external drag may reveal it again. Removing the last item hides the shelf immediately; an empty shelf shown for an active drag remains available until that drag ends.
 
+The shelf's gear and each item's remove action use a dark, opaque-enough control backing with a white SF Symbol. This avoids inheriting a dark template tint on the dark shelf or on a dark file preview. Keep the existing hit regions at least as large as the drawn controls, with no change to drop/drag behavior. Verify contrast in the installed app at normal and reduced shelf opacity.
+
 ## Placement, status, and startup
 
 Settings offers **左下**, **左上**, **右下**, **右上**, and **ファイルの近く**, persisted in `UserDefaults`. Placement uses the pointer's current display's `visibleFrame`. The four corner modes use a fixed inset. Near-drag mode prefers a position offset from the pointer and flips/clamps at display edges; a panel resize reuses the last pointer location. Geometry is pure and unit tested. Changing placement repositions the existing panel; it never creates another one.
