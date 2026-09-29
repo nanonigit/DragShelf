@@ -8,13 +8,15 @@ final class AppPresenceTests: XCTestCase {
                        AppPresence(dockVisible: true, menuBarVisible: true))
     }
 
-    func testCannotHideLastVisibleIcon() {
+    func testCanHideBothIcons() {
         let dockOnly = AppPresence(dockVisible: true, menuBarVisible: false)
-        XCTAssertNil(dockOnly.changingDockVisibility(to: false))
+        XCTAssertEqual(dockOnly.changingDockVisibility(to: false),
+                       AppPresence(dockVisible: false, menuBarVisible: false))
         XCTAssertNotNil(dockOnly.changingMenuBarVisibility(to: true))
 
         let menuOnly = AppPresence(dockVisible: false, menuBarVisible: true)
-        XCTAssertNil(menuOnly.changingMenuBarVisibility(to: false))
+        XCTAssertEqual(menuOnly.changingMenuBarVisibility(to: false),
+                       AppPresence(dockVisible: false, menuBarVisible: false))
         XCTAssertNotNil(menuOnly.changingDockVisibility(to: true))
     }
 
@@ -25,12 +27,12 @@ final class AppPresenceTests: XCTestCase {
         XCTAssertEqual(AppPresence.restored(from: defaults), menuOnly)
     }
 
-    func testInvalidStoredBothHiddenRestoresDock() {
+    func testBothHiddenPersistsAcrossRestart() {
         let defaults = makeDefaults()
         defaults.set(false, forKey: AppPresence.dockKey)
         defaults.set(false, forKey: AppPresence.menuBarKey)
         XCTAssertEqual(AppPresence.restored(from: defaults),
-                       AppPresence(dockVisible: true, menuBarVisible: false))
+                       AppPresence(dockVisible: false, menuBarVisible: false))
     }
 
     private func makeDefaults() -> UserDefaults {

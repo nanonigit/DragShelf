@@ -142,7 +142,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         displayPopup.addItems(withTitles: ["リスト", "アイコン"])
         displayPopup.target = self
         displayPopup.action = #selector(changeDisplayMode(_:))
-        placementPopup.addItems(withTitles: ["左下", "右下", "ドラッグ位置の近く"])
+        placementPopup.addItems(withTitles: ["左下", "左上", "右下", "右上", "ファイルの近く"])
         placementPopup.target = self
         placementPopup.action = #selector(changePlacement(_:))
         transparencySlider.target = self
@@ -219,7 +219,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
     func refresh(displayMode: ShelfDisplayMode, placement: ShelfPlacement,
                  transparencyPercent: Double) {
         displayPopup.selectItem(at: displayMode == .list ? 0 : 1)
-        placementPopup.selectItem(at: [.leftBottom, .rightBottom, .nearDrag].firstIndex(of: placement) ?? 2)
+        placementPopup.selectItem(at: ShelfPlacement.allCases.firstIndex(of: placement) ?? 4)
         transparencySlider.doubleValue = transparencyPercent
         historyPopup.selectItem(at: ShelfHistoryStore.supportedLimits.firstIndex(of: model.maximumItems) ?? 2)
         refreshFiles()
@@ -238,15 +238,9 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         loginCheckbox.state = status.loginEnabled ? .on : .off
         menuBarCheckbox.state = status.menuBarVisible ? .on : .off
         dockCheckbox.state = status.dockVisible ? .on : .off
-        menuBarCheckbox.isEnabled = status.dockVisible || !status.menuBarVisible
-        dockCheckbox.isEnabled = status.menuBarVisible || !status.dockVisible
-        if !status.menuBarVisible {
-            presenceNote.stringValue = "Dock を隠すには、先にメニューバーアイコンを表示してください。"
-        } else if !status.dockVisible {
-            presenceNote.stringValue = "メニューバーを隠すには、先に Dock アイコンを表示してください。"
-        } else {
-            presenceNote.stringValue = "少なくとも一方のアイコンを表示します。アプリケーションからも管理画面を開けます。"
-        }
+        menuBarCheckbox.isEnabled = true
+        dockCheckbox.isEnabled = true
+        presenceNote.stringValue = "両方を隠した場合も「アプリケーション」から DragShelf を開くと管理画面に戻れます。"
         loginCheckbox.isEnabled = status.loginAvailable
         loginStatusLabel.stringValue = status.loginText
         permissionLabel.stringValue = status.inputGranted ? "アプリ側で許可済み" : "アプリ側では未許可"
@@ -299,7 +293,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         onDisplayModeChange?(sender.indexOfSelectedItem == 0 ? .list : .icons)
     }
     @objc private func changePlacement(_ sender: NSPopUpButton) {
-        let values: [ShelfPlacement] = [.leftBottom, .rightBottom, .nearDrag]
+        let values = ShelfPlacement.allCases
         guard values.indices.contains(sender.indexOfSelectedItem) else { return }
         onPlacementChange?(values[sender.indexOfSelectedItem])
     }

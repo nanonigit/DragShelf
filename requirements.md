@@ -21,7 +21,8 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 - Show a useful content preview where macOS can generate one, with a file icon fallback. Let the user switch between compact list and larger icon views; preserve the choice across launches.
 - Keep the shelf narrow (about half its initial 320-point width); do not waste horizontal space in icon view. Remove the shelf title and provide a gear control that opens management.
 - Let the user adjust shelf transparency from management, preserve the setting, and retain enough opacity for legibility.
-- Offer left-bottom, right-bottom, and near-drag shelf placement choices. Clamp the panel to the pointer's display and preserve the choice across launches.
+- Offer left-bottom, left-top, right-bottom, right-top, and near-drag shelf placement choices. Show exactly one shelf at the selected location, clamp it to the pointer's display, and preserve the choice across launches.
+- Prevent a second DragShelf process, including a development bundle, from showing another shelf while one instance is already running.
 - Hide the shelf immediately when the last parked item is removed with its remove control. An empty shelf revealed during an active drag must remain usable until that drag ends.
 - Show the actual monitor mode in the menu rather than claiming the app is waiting for Input Monitoring when a fallback monitor is active.
 - Provide explicit show and hide actions in the menu bar and a management view where parked items can be reviewed and removed.
@@ -37,7 +38,7 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 - Keep the menu-bar menu short: open management, show/hide shelf, truthful drag/permission status, and quit. Move persistent choices (display mode, placement, transparency, login launch, and history size) into the management window. The permission status must still offer a clear path to System Settings when permission is absent.
 - Let the user show or hide the menu-bar icon from Settings, retain the choice across launches, and keep a reliable way back through the Applications/Dock launcher or shelf gear. Hiding the icon must not stop drag monitoring or remove the shelf.
 - Add a Settings choice for showing the app icon in the Dock. Preserve the choice across launches, apply it without interrupting parked items or monitoring, and report the actual applied state. Keep a tested route back to management when the Dock icon is hidden.
-- At least one of the Dock icon and menu-bar icon must remain available. Disable the control that would hide the final icon and explain how to change the other icon first.
+- Allow both Dock and menu-bar icons to be hidden, while retaining a verified management recovery path by reopening DragShelf from Applications. Explain this path beside the controls.
 - Put the Settings tab to the left of Parked Items and select Settings on a fresh management-window launch.
 - Persist parked file references locally so the shelf contents reappear after app restart. Do not copy file bytes or change the originals. Let the user choose the maximum retained item count in management; when exceeded, remove oldest references first, without deleting source files. Explain that moved/deleted files may no longer be available.
 

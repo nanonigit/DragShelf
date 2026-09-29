@@ -15,16 +15,14 @@ public struct AppPresence: Equatable {
     public static func restored(from defaults: UserDefaults) -> AppPresence {
         let dock = defaults.object(forKey: dockKey) as? Bool ?? true
         let menuBar = defaults.object(forKey: menuBarKey) as? Bool ?? true
-        return AppPresence(dockVisible: dock || !menuBar, menuBarVisible: menuBar)
+        return AppPresence(dockVisible: dock, menuBarVisible: menuBar)
     }
 
     public func changingDockVisibility(to visible: Bool) -> AppPresence? {
-        guard visible || menuBarVisible else { return nil }
         return AppPresence(dockVisible: visible, menuBarVisible: menuBarVisible)
     }
 
     public func changingMenuBarVisibility(to visible: Bool) -> AppPresence? {
-        guard visible || dockVisible else { return nil }
         return AppPresence(dockVisible: dockVisible, menuBarVisible: visible)
     }
 

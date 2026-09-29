@@ -8,9 +8,20 @@ import ServiceManagement
 @main
 enum DragShelfMain {
     private static var delegate: AppDelegate?
+    fileprivate static let bundleID = "com.github.nanonigit.DragShelf"
+    fileprivate static let reopenNotification = Notification.Name("com.github.nanonigit.DragShelf.reopenManagement")
 
     static func main() {
         let app = NSApplication.shared
+        let ownPID = ProcessInfo.processInfo.processIdentifier
+        if let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+            .filter({ !$0.isTerminated && $0.processIdentifier < ownPID })
+            .min(by: { $0.processIdentifier < $1.processIdentifier }) {
+            DistributedNotificationCenter.default().postNotificationName(
+                reopenNotification, object: bundleID, userInfo: nil, deliverImmediately: true)
+            _ = existing.activate(options: [.activateAllWindows])
+            return
+        }
         let presence = AppPresence.restored(from: .standard)
         let policy: NSApplication.ActivationPolicy = presence.dockVisible ? .regular : .accessory
         if !app.setActivationPolicy(policy) {
@@ -42,6 +53,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let loginService = SMAppService.loginItem(identifier: "com.github.nanonigit.DragShelf.LoginItem")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        DistributedNotificationCenter.default().addObserver(
+            self, selector: #selector(reopenFromOtherInstance(_:)),
+            name: DragShelfMain.reopenNotification, object: DragShelfMain.bundleID)
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = NSImage(systemSymbolName: "tray.and.arrow.down.fill", accessibilityDescription: "DragShelf")
         let menu = NSMenu()
@@ -96,6 +110,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        DistributedNotificationCenter.default().removeObserver(self)
         timer?.invalidate()
         permissionTimer?.invalidate()
         monitor?.stop()
@@ -104,6 +119,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         shelf.openManagement()
         return false
+    }
+
+    @objc private func reopenFromOtherInstance(_ notification: Notification) {
+        shelf.openManagement()
     }
 
     func menuWillOpen(_ menu: NSMenu) {

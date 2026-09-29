@@ -7,7 +7,9 @@ public enum ShelfDisplayMode: String, CaseIterable {
 
 public enum ShelfPlacement: String, CaseIterable {
     case leftBottom
+    case leftTop
     case rightBottom
+    case rightTop
     case nearDrag
 }
 
@@ -80,9 +82,15 @@ public struct ShelfLayout {
         case .leftBottom:
             x = visibleFrame.minX + inset
             y = visibleFrame.minY + inset
+        case .leftTop:
+            x = visibleFrame.minX + inset
+            y = visibleFrame.maxY - panelSize.height - inset
         case .rightBottom:
             x = visibleFrame.maxX - panelSize.width - inset
             y = visibleFrame.minY + inset
+        case .rightTop:
+            x = visibleFrame.maxX - panelSize.width - inset
+            y = visibleFrame.maxY - panelSize.height - inset
         case .nearDrag:
             let preferredX = pointer.x + 24
             x = preferredX + panelSize.width + inset <= visibleFrame.maxX
