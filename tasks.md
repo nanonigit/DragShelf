@@ -55,6 +55,8 @@
 
 ## Phase 3
 
+- [x] Replace the ad-hoc-signed login helper with a per-user LaunchAgent and migrate enabled legacy registrations. Verify `launchctl bootstrap` starts `/Applications/DragShelf.app --login-start` with exit code 0.
+- [ ] Confirm automatic startup after a real logout and login on the user's Mac.
 - [x] Increase gear and remove-control contrast on the shelf, enlarge the remove target, and install the build.
 - [ ] Visually verify both controls with parked files in icon and list modes at reduced shelf opacity.
 - [ ] Add promised files, images, text, and URLs one at a time with integration checks.

@@ -13,6 +13,13 @@ if [[ "$VERSION" != "$PLIST_VERSION" ]]; then
   echo "Version mismatch: requested $VERSION, Info.plist has $PLIST_VERSION" >&2
   exit 2
 fi
+LOGIN_VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$ROOT_DIR/Resources/LoginItem-Info.plist")"
+APP_BUILD="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$ROOT_DIR/Resources/Info.plist")"
+LOGIN_BUILD="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$ROOT_DIR/Resources/LoginItem-Info.plist")"
+if [[ "$VERSION" != "$LOGIN_VERSION" || "$APP_BUILD" != "$LOGIN_BUILD" ]]; then
+  echo "Main app and login item versions must match" >&2
+  exit 2
+fi
 
 BUILD_CONFIGURATION=release "$ROOT_DIR/script/build_and_run.sh" --build-only
 ARCHIVE_DIR="$ROOT_DIR/releases"

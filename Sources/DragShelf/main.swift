@@ -50,7 +50,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var visibilityItem: NSMenuItem?
     private var countItem: NSMenuItem?
     private var loggedFirstMove = false
-    private let loginService = SMAppService.loginItem(identifier: "com.github.nanonigit.DragShelf.LoginItem")
+    private let legacyLoginService = SMAppService.loginItem(identifier: "com.github.nanonigit.DragShelf.LoginItem")
+    private let loginAgent = LoginLaunchAgent()
+    private var loginRepairError: String?
+
+    private var isInstalledInApplications: Bool {
+        Bundle.main.bundleURL.standardizedFileURL.path == "/Applications/DragShelf.app"
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         DistributedNotificationCenter.default().addObserver(
@@ -85,6 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                                loginAvailable: false, menuBarVisible: true,
                                                dockVisible: true)
         }
+        migrateLoginItemIfNeeded()
 
         let monitor = GlobalDragMonitor { [weak self] kind, point in
             self?.receive(kind, at: point)
@@ -238,19 +245,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func managementSystemStatus() -> ShelfManagementWindow.SystemStatus {
-        let status = loginService.status
+        let oldStatus = legacyLoginService.status
+        let enabled = loginAgent.isEnabled(for: Bundle.main.bundleURL)
         let loginText: String
-        switch status {
-        case .enabled:
-            loginText = "有効"
-        case .requiresApproval:
-            loginText = "システム設定で承認待ち"
-        case .notFound:
-            loginText = "未登録（有効にすると登録を試みます）"
-        case .notRegistered:
-            loginText = "無効"
-        @unknown default:
-            loginText = "状態不明"
+        if loginRepairError != nil {
+            loginText = "設定エラー（もう一度切り替えてください）"
+        } else if enabled {
+            loginText = "有効（次回ログイン時に起動）"
+        } else {
+            loginText = oldStatus == .requiresApproval ? "旧項目の承認待ち" : "無効"
         }
         let detectionText: String
         if monitor?.isRunning != true {
@@ -262,8 +265,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         return ShelfManagementWindow.SystemStatus(
             inputGranted: CGPreflightListenEventAccess(), detectionText: detectionText,
-            loginText: loginText, loginEnabled: status == .enabled || status == .requiresApproval,
-            loginAvailable: true, menuBarVisible: statusItem?.isVisible ?? true,
+            loginText: loginText,
+            loginEnabled: enabled || oldStatus == .enabled || oldStatus == .requiresApproval,
+            loginAvailable: isInstalledInApplications,
+            menuBarVisible: statusItem?.isVisible ?? true,
             dockVisible: NSApp.activationPolicy() == .regular
         )
     }
@@ -305,11 +310,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleLoginItem() {
         do {
-            if loginService.status == .enabled || loginService.status == .requiresApproval {
-                try loginService.unregister()
+            if loginAgent.isConfigured || legacyLoginService.status == .enabled
+                || legacyLoginService.status == .requiresApproval {
+                try loginAgent.disable()
+                if legacyLoginService.status == .enabled || legacyLoginService.status == .requiresApproval {
+                    try legacyLoginService.unregister()
+                }
             } else {
-                try loginService.register()
+                try loginAgent.enable(for: Bundle.main.bundleURL)
             }
+            loginRepairError = nil
         } catch {
             let alert = NSAlert()
             alert.messageText = "ログイン時起動を変更できませんでした"
@@ -318,6 +328,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             log.error("Login item change failed: \(error.localizedDescription, privacy: .public)")
         }
         updateMenuState()
+    }
+
+    private func migrateLoginItemIfNeeded() {
+        guard isInstalledInApplications else { return }
+        let oldStatus = legacyLoginService.status
+        guard oldStatus == .enabled || loginAgent.isConfigured else { return }
+        do {
+            if !loginAgent.isEnabled(for: Bundle.main.bundleURL) {
+                try loginAgent.enable(for: Bundle.main.bundleURL)
+            }
+            if oldStatus == .enabled {
+                try legacyLoginService.unregister()
+            }
+            loginRepairError = nil
+            log.info("Migrated startup registration to the user LaunchAgent")
+        } catch {
+            loginRepairError = error.localizedDescription
+            log.error("Could not migrate startup registration: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func refreshMonitorForPermissionChange() {

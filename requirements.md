@@ -30,6 +30,7 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 - Opening the app from Applications or an app launcher shows the management window, including on an already-running app. Hiding the shelf must not remove access to this window or hide the menu-bar item.
 - Login-time automatic launch must stay unobtrusive; it should start the shelf service without unexpectedly opening the management window.
 - Offer an opt-in launch-at-login toggle backed by macOS login-item registration, and show the actual registration/approval state rather than assuming it succeeded.
+- After an app update, preserve the user's login-launch choice and keep its configured path pointed at the installed app. Do not silently enable login launch when the user left it disabled; verify that the configured job can actually start the app, not just that a checkbox is on.
 - Give the app an original, legible macOS icon in the bundle and menu-bar affordance.
 - Keep the panel nonactivating and accessible across Spaces. Hide it when empty and a drag ends; keep it visible when it contains items.
 - Support a menu-bar Show Shelf action. Do not move or delete original files when parking.

@@ -94,3 +94,13 @@ Record pass/fail and any app-specific deviations here after the physical checks.
 - Final ZIP SHA-256: `6712ad31bf42f1a00a62b2981f6c9c120a663aaad3ab1027c813065676a122d9`. `unzip -t` passed and the main executable is arm64. Published [v0.1.4](https://github.com/nanonigit/DragShelf/releases/tag/v0.1.4) as a prerelease with ZIP and checksum.
 - Updated [homebrew-DragShelf](https://github.com/nanonigit/homebrew-DragShelf) to v0.1.4. The installed tap fast-forwarded; `brew audit --cask nanonigit/dragshelf/dragshelf` and `brew fetch --cask nanonigit/dragshelf/dragshelf` passed.
 - After replacing the bundle, terminated the pre-update process and started the installed copy again. One `/Applications/DragShelf.app` process is running (PID 92562); management shows the AppKit fallback and the saved menu-bar/Dock settings.
+
+## 2026-09-30 — login startup repair candidate
+
+- The v0.1.4 `SMAppService` job repeatedly failed with `EX_CONFIG`. Re-registering a v0.1.5 helper fixed path resolution but not execution: `launchd` logged `OS_REASON_CODESIGNING | Launch Constraint Violation`, and `amfid` identified the ad-hoc signature.
+- Replaced login startup with a per-user LaunchAgent invoking `/usr/bin/open` on `/Applications/DragShelf.app --login-start`. Only users whose legacy item was enabled are migrated; the old failing service is unregistered. Corrected the helper's main-app bundle identifier as a separate defect.
+- `swift test`: 19 passed, 0 failed, including agent write/path-refresh/remove tests. The release build and `codesign --verify --deep --strict` passed; the app remains ad-hoc signed and unnotarized.
+- Installed the candidate at `/Applications/DragShelf.app`. The exact LaunchAgent plist passed `plutil -p`; `launchctl bootstrap gui/503` started the installed app with `--login-start`, and `launchctl print` reported `runs = 1` and `last exit code = 0`. The old login-item service was absent.
+- An actual logout/login remains untested. This is a session bootstrap test, not proof of the next real login.
+- The native management UI showed the login checkbox on and “有効（次回ログイン時に起動）”. The final arm64 ZIP passed `unzip -t`; SHA-256: `882ba676cb08211c6d79b74d3d8bd2a4ced4b0fa60a3b07f4a5d02ea965934ba`.
+- In the installed management UI, turning login launch off removed the exact LaunchAgent plist and changed the checkbox/status to off. Turning it on recreated a valid plist and restored the on/status display; the setting was left on.
