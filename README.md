@@ -18,7 +18,11 @@ DragShelf is a macOS utility for handing files from one window or app to another
 
 When DragShelf detects a supported file drag, it reveals a compact shelf at your chosen screen corner or near the pointer. Drop your file onto it and let go of the mouse button. You can then bring another window forward, switch apps or Spaces, and find the destination without keeping a drag held down. When you are ready, drag the file from the shelf to where you need it.
 
-Use it to keep a document handy while composing an attachment, prepare a file before opening an upload form, or gather files from different folders for later use. Parking stores a reference to the original file—not a new copy—and does not move or delete it.
+Use it to keep a document handy while composing an attachment, prepare a file before opening an upload form, or gather files from different folders for later use. 
+
+**Why it was built:** With the daily use of AI tools (ChatGPT, Claude, Cursor, Gemini, etc.), taking screenshots to give visual context and instructions has become a constant habit. DragShelf was created to make this frictionless—letting you instantly park freshly taken screenshots on a shelf, switch to your AI chat, and drop them right in without littering your desktop or losing your flow across multiple Spaces.
+
+Parking stores a reference to the original file—not a new copy—and does not move or delete it.
 
 ### How to use it
 
@@ -94,7 +98,12 @@ DragShelf は、Mac のウィンドウやアプリの間でファイルを渡す
 
 対応するファイルのドラッグを検知すると、画面の四隅やカーソルの近くなど、指定した位置に小さな棚が現れます。そこへファイルを置けば、マウスのボタンを離せます。別のウィンドウを手前に出したり、アプリや Spaces を切り替えたりして、落ち着いて移動先を開いてください。準備ができたら、棚から目的の場所へドラッグして渡せます。
 
-メールを書き始める前に添付する書類を置く。アップロード画面を開く前にファイルを用意する。別々のフォルダにあるファイルを集めておく。そんな場面で、棚がファイルの受け渡しの中継地点になります。棚に保存するのは元ファイルへの参照だけで、置くときにファイル本体を複製・移動・削除することはありません。
+メールを書き始める前に添付する書類を置く。アップロード画面を開く前にファイルを用意する。別々のフォルダにあるファイルを集めておく。そんな場面で、棚がファイルの受け渡しの中継地点になります。
+
+**開発のきっかけ（AIとのやり取りをスムーズに）:**  
+ChatGPT や Claude、Cursor などの AI ツールを日常的に使うようになり、「画面のスクリーンショットを撮って AI に見せながら指示を出す」操作が激増しました。DragShelf はまさにその体験から生まれました。撮ったばかりのスクショをデスクトップに散らかすことなく棚にサッと一時退避し、別画面の AI チャットを開いてスムーズに放り込むことができます。
+
+棚に保存するのは元ファイルへの参照だけで、置くときにファイル本体を複製・移動・削除することはありません。
 
 ### 基本の使い方
 
