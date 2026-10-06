@@ -70,3 +70,13 @@
 - [ ] Add promised files, images, text, and URLs one at a time with integration checks.
 - [ ] Add preferences, accessibility, and launch behavior.
 - [ ] Perform a clean-build and real interaction pass before release.
+
+## English / Japanese language switching
+
+- [x] Define default-English, persisted-language, in-place refresh requirements and design.
+- [x] Add preference/catalog tests first, then implement the shared typed catalog.
+- [x] Add Settings language selector and refresh management, shelf, menu, status and alerts.
+- [x] Test state preservation, both languages, persistence, and invalid preference fallback.
+- [x] Build/install `/Applications/DragShelf.app` and verify the native Settings UI.
+- [x] Organize settings into four native groups, move troubleshooting into Help, and use direct history-limit buttons.
+- [x] Update bilingual README and record verification results.

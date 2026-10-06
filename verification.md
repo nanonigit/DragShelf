@@ -1,5 +1,18 @@
 # Verification record
 
+## 2026-10-06 — English/Japanese and grouped Settings candidate
+
+- Added an independent, persisted language preference. Fresh/missing/invalid values resolve to English even if macOS prefers Japanese. All app-owned management, menu, shelf, tooltip/accessibility, status, and alert strings use a typed bilingual catalog. Native macOS dialogs/system error descriptions still follow OS language.
+- Requirements/design were recorded before implementation; the first language tests failed because the feature did not exist, then passed after implementation. Final `swift test`: 23 Core tests passed; 5 AppKit tests passed, with 1 existing native Quick Look lifecycle test skipped because unhosted XCTest cannot acquire key focus. No failed tests. Language UI tests cover repeated switching, selected tabs, display/placement indices, opacity, history limit, parked-reference persistence, and overflow at a smaller active Settings window.
+- Grouped Settings in General, Shelf Appearance, History, and Drag Detection sections. Language and startup/icon choices are together; permission troubleshooting opens in a localized Help sheet. History limit uses direct 5/10/25/50/100 single-selection buttons.
+- Native screenshots exposed a discrepancy that selection/accessibility assertions did not detect: the translated history popup could visibly show its first item although the selected value remained 25. Documented reproduction, attempted repairs, and the final language-independent history selector in `bug-investigation/reports/language-popup-2026-10-06.md` and its Japanese translation.
+- `BUILD_CONFIGURATION=release bash script/build_and_run.sh --build-only` passed. Installed at `/Applications/DragShelf.app`; deep/strict ad-hoc signature verification passed. Staged and installed executable SHA-256 both equal `e15c086fe6967d97f1aac7a906dcb4f96856b57dc67d79ec888f485269f47230`. Previous installed bundle retained at `/tmp/DragShelf-language-backup.TGpqHj/DragShelf.app` for local rollback.
+- Native UI verified English default on first updated launch, Japanese immediate switching, both layouts, Japanese Help sheet, and the highlighted 25 limit in both languages. Changed limit 25→50→25 successfully. Japanese selection survived a restart; final preference was set to English. Preserved the observed icon, startup, display, placement, and transparency choices.
+- The app reports Input Monitoring not recognized and an active AppKit fallback. Permission changes remain user-controlled. This work does not claim to fix the prior signing/permission discrepancy, nor replace broader drag/full-screen/multiple-display validation.
+- Bilingual README describes the feature as current source, not part of the existing v0.1.6 public download. No GitHub Release or Homebrew update was made in this pass.
+
+日本語: 初期値は英語。設定を4グループに整理し、英語・日本語の切替、状態保持、再起動後の日本語復元、ヘルプ、保存件数25→50→25を実画面で確認した。保存件数は直接選択する形式に変更。テスト28件成功・失敗なし、既存のQuick Look実画面テスト1件は環境制約でスキップ。アプリケーション内のアプリを更新し、最終言語は英語。入力監視の既存問題と公開配布版の更新は別件で、未解決・未実施。
+
 ## 2026-10-06 — v0.1.6 Quick Look
 
 - Added native `QLPreviewPanel` with click-to-focus Space handling, following the user's approval to use a click. Merely hovering does not take focus. No keyboard monitor or new TCC permission is added.

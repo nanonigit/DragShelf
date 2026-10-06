@@ -58,3 +58,15 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 - Phase 1 is an experiment. Passing a build or unit test alone does not prove cross-app drag detection; a real Finder-to-shelf drag is required.
 - Prefer supported AppKit/Core Graphics APIs. Never use private drag-session APIs.
 - The app should inspect pasteboard *types* for detection and read item content only after the user drops onto the shelf.
+
+## Application language / アプリの表示言語
+
+- Organize Settings into General, Shelf Appearance, History, and Drag Detection groups. Keep troubleshooting text behind a Help button, and retain a scrollable layout at smaller window sizes.
+- 設定を「基本設定」「棚の表示」「履歴」「ドラッグ検知」に整理し、長い権限トラブルの説明はヘルプへまとめる。
+
+- Default to English, independently of macOS language, including existing installs with no saved choice.
+- Offer English and 日本語 at the top of Settings; save the selection across restarts.
+- Immediately update management, shelf, menu, status, accessibility descriptions, and app-owned alerts.
+- Keep parked references, history limit, placement, opacity, display mode, tab selection, and monitoring unchanged.
+- Invalid saved values fall back to English. Native macOS dialogs and system error descriptions follow the OS language.
+- 初期値は英語。管理画面で日本語へ切り替えられ、再起動後も選択を維持する。言語変更で棚や他の設定を初期化しない。

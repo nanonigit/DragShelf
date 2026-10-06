@@ -13,6 +13,7 @@ final class ShelfController {
     private var lastScreen: NSScreen?
     private var lastPointer = NSPoint.zero
     var onLoginToggle: (() -> Void)?
+    var onLanguageChange: (() -> Void)?
     var onMenuBarVisibilityChange: ((Bool) -> Void)?
     var onDockVisibilityChange: ((Bool) -> Void)?
     var onOpenInputSettings: (() -> Void)?
@@ -108,6 +109,7 @@ final class ShelfController {
                                                       displayMode: displayMode, placement: placement,
                                                       transparencyPercent: transparencyPercent)
             newManagement.onDisplayModeChange = { [weak self] in self?.setDisplayMode($0) }
+            newManagement.onLanguageChange = { [weak self] in self?.setLanguage($0) }
             newManagement.onPlacementChange = { [weak self] in self?.setPlacement($0) }
             newManagement.onTransparencyChange = { [weak self] in self?.setTransparency($0) }
             newManagement.onHistoryLimitChange = { [weak self] in self?.model.setMaximumItems($0) }
@@ -126,6 +128,14 @@ final class ShelfController {
         panel.alphaValue = 1 - transparencyPercent / 100
         management?.refresh(displayMode: displayMode, placement: placement,
                             transparencyPercent: transparencyPercent)
+    }
+
+    func setLanguage(_ language: AppLanguage) {
+        language.save(to: .standard)
+        management?.refreshLanguage()
+        dropView.toolTip = L(.previewHelp)
+        dropView.needsDisplay = true
+        onLanguageChange?()
     }
 
     func refreshManagementSystemStatus() {

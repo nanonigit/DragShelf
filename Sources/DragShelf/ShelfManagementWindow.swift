@@ -15,27 +15,31 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
 
     private let model: ShelfModel
     private let previews: FilePreviewStore
-    private let window: NSWindow
+    let window: NSWindow
     private let table = NSTableView()
+    private let tabs = NSTabView(frame: NSRect(x: 0, y: 0, width: 600, height: 700))
+    private let languagePopup = NSPopUpButton(frame: .zero, pullsDown: false)
+    private var localizedLabels: [(NSTextField, AppText)] = []
     private let countLabel = NSTextField(labelWithString: "")
-    private let emptyLabel = NSTextField(labelWithString: "ファイルを棚へドラッグすると、ここに表示されます")
-    private let displayPopup = NSPopUpButton(frame: .zero, pullsDown: false)
-    private let placementPopup = NSPopUpButton(frame: .zero, pullsDown: false)
+    private let emptyLabel = NSTextField(labelWithString: L(.emptyFiles))
+    private var displayPopup = NSPopUpButton(frame: .zero, pullsDown: false)
+    private var placementPopup = NSPopUpButton(frame: .zero, pullsDown: false)
     private let transparencySlider = NSSlider(value: 0, minValue: 0, maxValue: 60,
                                               target: nil, action: nil)
-    private let historyPopup = NSPopUpButton(frame: .zero, pullsDown: false)
-    private let loginCheckbox = NSButton(checkboxWithTitle: "有効にする", target: nil, action: nil)
-    private let menuBarCheckbox = NSButton(checkboxWithTitle: "表示する", target: nil, action: nil)
-    private let dockCheckbox = NSButton(checkboxWithTitle: "表示する", target: nil, action: nil)
+    private let historyControl = NSSegmentedControl(labels: ShelfHistoryStore.supportedLimits.map { String($0) },
+                                                    trackingMode: .selectOne, target: nil, action: nil)
+    private let loginCheckbox = NSButton(checkboxWithTitle: L(.enable), target: nil, action: nil)
+    private let menuBarCheckbox = NSButton(checkboxWithTitle: L(.show), target: nil, action: nil)
+    private let dockCheckbox = NSButton(checkboxWithTitle: L(.show), target: nil, action: nil)
     private let presenceNote = NSTextField(wrappingLabelWithString: "")
     private let loginStatusLabel = NSTextField(labelWithString: "")
     private let permissionLabel = NSTextField(labelWithString: "")
-    private let permissionButton = NSButton(title: "入力監視の設定を開く", target: nil, action: nil)
-    private let permissionNote = NSTextField(wrappingLabelWithString:
-        "設定が ON でも未許可なら、アプリ更新で署名が変わった可能性があります。設定を OFF→ON にし、アプリを再起動してください。")
+    private let permissionButton = NSButton(title: L(.openInputSettings), target: nil, action: nil)
+    private let permissionHelpButton = NSButton(title: L(.permissionHelpTitle), target: nil, action: nil)
     private let detectionLabel = NSTextField(labelWithString: "")
 
     var onDisplayModeChange: ((ShelfDisplayMode) -> Void)?
+    var onLanguageChange: ((AppLanguage) -> Void)?
     var onPlacementChange: ((ShelfPlacement) -> Void)?
     var onTransparencyChange: ((Double) -> Void)?
     var onHistoryLimitChange: ((Int) -> Void)?
@@ -49,16 +53,15 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
          placement: ShelfPlacement, transparencyPercent: Double) {
         self.model = model
         self.previews = previews
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 580, height: 590),
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 740),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
                           backing: .buffered, defer: false)
         super.init()
-        window.title = "DragShelf の管理"
-        window.minSize = NSSize(width: 520, height: 560)
+        window.title = L(.managementTitle)
+        window.minSize = NSSize(width: 600, height: 560)
         window.center()
         window.isReleasedWhenClosed = false
 
-        let tabs = NSTabView()
         tabs.translatesAutoresizingMaskIntoConstraints = false
         let content = NSView()
         window.contentView = content
@@ -71,18 +74,19 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         ])
 
         let settingsTab = NSTabViewItem(identifier: "settings")
-        settingsTab.label = "設定"
+        settingsTab.label = L(.settings)
         settingsTab.view = makeSettingsView()
         tabs.addTabViewItem(settingsTab)
 
         let filesTab = NSTabViewItem(identifier: "files")
-        filesTab.label = "一時置き"
+        filesTab.label = L(.parkedItems)
         filesTab.view = makeFilesView()
         tabs.addTabViewItem(filesTab)
         tabs.selectTabViewItem(settingsTab)
 
         refresh(displayMode: displayMode, placement: placement,
                 transparencyPercent: transparencyPercent)
+        refreshLanguage()
     }
 
     private func makeFilesView() -> NSView {
@@ -92,7 +96,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         content.addSubview(countLabel)
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("file"))
-        column.title = "一時置きしたファイル"
+        column.title = L(.parkedFiles)
         table.addTableColumn(column)
         table.headerView = nil
         table.rowHeight = 54
@@ -100,7 +104,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         table.delegate = self
         table.dataSource = self
 
-        let scroll = NSScrollView()
+        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 580, height: 650))
         scroll.documentView = table
         scroll.hasVerticalScroller = true
         scroll.autohidesScrollers = true
@@ -125,32 +129,36 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
     }
 
     private func makeSettingsView() -> NSView {
-        let content = NSView()
+        let content = SettingsDocumentView()
         let stack = NSStackView()
         stack.orientation = .vertical
         stack.alignment = .leading
-        stack.spacing = 8
+        stack.spacing = 14
         stack.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
             stack.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
             stack.topAnchor.constraint(equalTo: content.topAnchor, constant: 16),
-            stack.bottomAnchor.constraint(lessThanOrEqualTo: content.bottomAnchor, constant: -12),
+            stack.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -16),
         ])
 
-        displayPopup.addItems(withTitles: ["リスト", "アイコン"])
+        languagePopup.addItems(withTitles: AppLanguage.allCases.map(\.nativeName))
+        languagePopup.setAccessibilityIdentifier("appLanguage")
+        languagePopup.target = self
+        languagePopup.action = #selector(changeLanguage(_:))
+
+        displayPopup.addItems(withTitles: [L(.list), L(.icons)])
         displayPopup.target = self
         displayPopup.action = #selector(changeDisplayMode(_:))
-        placementPopup.addItems(withTitles: ["左下", "左上", "右下", "右上", "ファイルの近く"])
+        placementPopup.addItems(withTitles: [L(.leftBottom), L(.leftTop), L(.rightBottom), L(.rightTop), L(.nearDrag)])
         placementPopup.target = self
         placementPopup.action = #selector(changePlacement(_:))
         transparencySlider.target = self
         transparencySlider.action = #selector(changeTransparency(_:))
-        transparencySlider.toolTip = "0%（不透明）〜60%（透明）"
-        historyPopup.addItems(withTitles: ShelfHistoryStore.supportedLimits.map { "\($0) 件" })
-        historyPopup.target = self
-        historyPopup.action = #selector(changeHistoryLimit(_:))
+        transparencySlider.toolTip = L(.transparencyHelp)
+        historyControl.target = self
+        historyControl.action = #selector(changeHistoryLimit(_:))
         loginCheckbox.target = self
         loginCheckbox.action = #selector(toggleLogin(_:))
         menuBarCheckbox.target = self
@@ -159,45 +167,95 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         dockCheckbox.action = #selector(changeDockVisibility(_:))
         permissionButton.target = self
         permissionButton.action = #selector(openInputSettings(_:))
+        permissionHelpButton.target = self
+        permissionHelpButton.action = #selector(showPermissionHelp(_:))
 
-        addHeading("表示", to: stack)
-        addRow("表示形式", control: displayPopup, to: stack)
-        addRow("棚の位置", control: placementPopup, to: stack)
-        addRow("棚の透明度", control: transparencySlider, to: stack)
-        addRow("メニューバーアイコン", control: menuBarCheckbox, to: stack)
-        addRow("Dock アイコン", control: dockCheckbox, to: stack)
-        presenceNote.textColor = .secondaryLabelColor
-        stack.addArrangedSubview(presenceNote)
-        presenceNote.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
-        addHeading("履歴", to: stack)
-        addRow("最大保存件数", control: historyPopup, to: stack)
-        let note = NSTextField(wrappingLabelWithString: "上限を超えると古い項目から棚を外します。元のファイルは消しません。")
-        note.textColor = .secondaryLabelColor
-        stack.addArrangedSubview(note)
-        note.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
-        addHeading("起動", to: stack)
-        addRow("ログイン時に起動", control: loginCheckbox, to: stack)
-        loginStatusLabel.textColor = .secondaryLabelColor
-        stack.addArrangedSubview(loginStatusLabel)
-        addHeading("ドラッグ検知", to: stack)
-        addRow("入力監視", control: permissionLabel, to: stack)
-        addRow("", control: permissionButton, to: stack)
-        permissionNote.textColor = .secondaryLabelColor
-        permissionNote.font = .systemFont(ofSize: 11)
-        stack.addArrangedSubview(permissionNote)
-        permissionNote.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
-        addRow("現在の動作", control: detectionLabel, to: stack)
-        return content
+        let general = addSection(.general, to: stack)
+        addRow(.language, control: languagePopup, to: general)
+        addRow(.menuBarIcon, control: menuBarCheckbox, to: general)
+        addRow(.dockIcon, control: dockCheckbox, to: general)
+        addRow(.launchAtLogin, control: loginCheckbox, to: general)
+        addNote(loginStatusLabel, to: general)
+        addNote(presenceNote, to: general)
+
+        let appearance = addSection(.shelfAppearance, to: stack)
+        addRow(.displayMode, control: displayPopup, to: appearance)
+        addRow(.placement, control: placementPopup, to: appearance)
+        addRow(.transparency, control: transparencySlider, to: appearance)
+
+        let history = addSection(.history, to: stack)
+        addRow(.maximumItems, control: historyControl, to: history)
+        let note = NSTextField(wrappingLabelWithString: L(.historyHelp))
+        localizedLabels.append((note, .historyHelp))
+        addNote(note, to: history)
+
+        let detection = addSection(.dragDetection, to: stack)
+        addRow(.currentStatus, control: detectionLabel, to: detection)
+        addRow(.inputMonitoring, control: permissionLabel, to: detection)
+        let permissionActions = NSStackView(views: [permissionButton, permissionHelpButton])
+        permissionActions.spacing = 8
+        addRow(nil, control: permissionActions, to: detection)
+
+        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 580, height: 650))
+        scroll.hasVerticalScroller = true
+        scroll.autohidesScrollers = true
+        scroll.drawsBackground = false
+        content.translatesAutoresizingMaskIntoConstraints = false
+        scroll.documentView = content
+        NSLayoutConstraint.activate([
+            content.topAnchor.constraint(equalTo: scroll.contentView.topAnchor),
+            content.leadingAnchor.constraint(equalTo: scroll.contentView.leadingAnchor),
+            content.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
+        ])
+        return scroll
     }
 
-    private func addHeading(_ title: String, to stack: NSStackView) {
-        let label = NSTextField(labelWithString: title)
+    private func addHeading(_ key: AppText, to stack: NSStackView) {
+        let label = NSTextField(labelWithString: L(key))
+        localizedLabels.append((label, key))
         label.font = .boldSystemFont(ofSize: 14)
         stack.addArrangedSubview(label)
     }
 
-    private func addRow(_ title: String, control: NSView, to stack: NSStackView) {
-        let label = NSTextField(labelWithString: title)
+    private func addSection(_ key: AppText, to parent: NSStackView) -> NSStackView {
+        let box = NSBox(frame: NSRect(x: 0, y: 0, width: 540, height: 100))
+        box.boxType = .custom
+        box.titlePosition = .noTitle
+        box.cornerRadius = 8
+        box.borderWidth = 1
+        box.borderColor = .separatorColor
+        box.fillColor = .controlBackgroundColor
+        box.setAccessibilityLabel(L(key))
+        let section = NSStackView()
+        section.orientation = .vertical
+        section.alignment = .leading
+        section.spacing = 8
+        section.translatesAutoresizingMaskIntoConstraints = false
+        box.contentView!.addSubview(section)
+        parent.addArrangedSubview(box)
+        NSLayoutConstraint.activate([
+            box.widthAnchor.constraint(equalTo: parent.widthAnchor),
+            section.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+            section.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
+            section.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
+            section.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -12),
+        ])
+        addHeading(key, to: section)
+        // The heading supplies the localized accessibility text without a stale box title.
+        box.setAccessibilityElement(false)
+        return section
+    }
+
+    private func addNote(_ label: NSTextField, to stack: NSStackView) {
+        label.textColor = .secondaryLabelColor
+        label.font = .systemFont(ofSize: 11)
+        stack.addArrangedSubview(label)
+        label.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+    }
+
+    private func addRow(_ key: AppText?, control: NSView, to stack: NSStackView) {
+        let label = NSTextField(labelWithString: key.map { L($0) } ?? "")
+        if let key { localizedLabels.append((label, key)) }
         label.alignment = .right
         label.widthAnchor.constraint(equalToConstant: 142).isActive = true
         let row = NSStackView(views: [label, control])
@@ -216,19 +274,58 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    /// Change text in place: retain the active tab, controls, and parked-file model.
+    func refreshLanguage() {
+        window.title = L(.managementTitle)
+        tabs.tabViewItems[0].label = L(.settings)
+        tabs.tabViewItems[1].label = L(.parkedItems)
+        languagePopup.selectItem(at: AppLanguage.allCases.firstIndex(of: AppLanguage.restored(from: .standard)) ?? 0)
+        languagePopup.setAccessibilityLabel("Language / 言語")
+        for (label, key) in localizedLabels { label.stringValue = L(key) }
+        displayPopup = translatedPopup(displayPopup, titles: [AppText.list, .icons].map { L($0) })
+        placementPopup = translatedPopup(placementPopup, titles: [AppText.leftBottom, .leftTop, .rightBottom, .rightTop, .nearDrag].map { L($0) })
+        historyControl.setAccessibilityLabel(L(.maximumItems))
+        loginCheckbox.title = L(.enable)
+        menuBarCheckbox.title = L(.show)
+        dockCheckbox.title = L(.show)
+        emptyLabel.stringValue = L(.emptyFiles)
+        permissionButton.title = L(.openInputSettings)
+        permissionHelpButton.title = L(.permissionHelpTitle)
+        transparencySlider.toolTip = L(.transparencyHelp)
+        table.tableColumns.first?.title = L(.parkedFiles)
+        refreshFiles()
+        refreshSystemStatus()
+    }
+
+    private func translatedPopup(_ popup: NSPopUpButton, titles: [String]) -> NSPopUpButton {
+        guard let row = popup.superview as? NSStackView else { return popup }
+        // A live popup's modern renderer can keep the first item's title cached
+        // even when its selection and cell title are correct. Replace only this
+        // control, configuring its selection before attachment; never fire actions.
+        let replacement = NSPopUpButton(frame: popup.frame, pullsDown: false)
+        replacement.addItems(withTitles: titles)
+        replacement.selectItem(at: popup.indexOfSelectedItem)
+        replacement.target = popup.target
+        replacement.action = popup.action
+        row.removeArrangedSubview(popup)
+        popup.removeFromSuperview()
+        row.addArrangedSubview(replacement)
+        return replacement
+    }
+
     func refresh(displayMode: ShelfDisplayMode, placement: ShelfPlacement,
                  transparencyPercent: Double) {
         displayPopup.selectItem(at: displayMode == .list ? 0 : 1)
         placementPopup.selectItem(at: ShelfPlacement.allCases.firstIndex(of: placement) ?? 4)
         transparencySlider.doubleValue = transparencyPercent
-        historyPopup.selectItem(at: ShelfHistoryStore.supportedLimits.firstIndex(of: model.maximumItems) ?? 2)
+        historyControl.selectedSegment = ShelfHistoryStore.supportedLimits.firstIndex(of: model.maximumItems) ?? 2
         refreshFiles()
     }
 
     func refreshFiles() {
         countLabel.stringValue = model.files.isEmpty
-            ? "棚は空です。ファイルをドラッグして一時置きできます。"
-            : "一時置き: \(model.files.count) / \(model.maximumItems) 件　　× で棚から取り外せます。"
+            ? L(.emptyCount)
+            : L(.managementCount, model.files.count, model.maximumItems)
         emptyLabel.isHidden = !model.files.isEmpty
         table.reloadData()
     }
@@ -240,12 +337,11 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         dockCheckbox.state = status.dockVisible ? .on : .off
         menuBarCheckbox.isEnabled = true
         dockCheckbox.isEnabled = true
-        presenceNote.stringValue = "両方を隠した場合も「アプリケーション」から DragShelf を開くと管理画面に戻れます。"
+        presenceNote.stringValue = L(.presenceHelp)
         loginCheckbox.isEnabled = status.loginAvailable
         loginStatusLabel.stringValue = status.loginText
-        permissionLabel.stringValue = status.inputGranted ? "アプリ側で許可済み" : "アプリ側では未許可"
+        permissionLabel.stringValue = status.inputGranted ? L(.permissionGranted) : L(.permissionDenied)
         permissionButton.isEnabled = !status.inputGranted
-        permissionNote.isHidden = status.inputGranted
         detectionLabel.stringValue = status.detectionText
     }
 
@@ -269,7 +365,7 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         cell.addSubview(name)
         if !FileManager.default.fileExists(atPath: url.path) {
             name.textColor = .secondaryLabelColor
-            let missing = NSTextField(labelWithString: "元ファイルが見つかりません")
+            let missing = NSTextField(labelWithString: L(.missingFile))
             missing.textColor = .systemOrange
             missing.font = .systemFont(ofSize: 11)
             missing.frame = NSRect(x: 56, y: 8, width: 230, height: 16)
@@ -277,18 +373,24 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         }
 
         let remove = NSButton(image: NSImage(systemSymbolName: "xmark.circle",
-                                             accessibilityDescription: "棚から取り外す")!,
+                                             accessibilityDescription: L(.remove))!,
                               target: self, action: #selector(removeFile(_:)))
         remove.frame = NSRect(x: max(115, table.bounds.width - 42), y: 12, width: 28, height: 28)
         remove.autoresizingMask = [.minXMargin]
         remove.isBordered = false
         remove.tag = row
-        remove.toolTip = "棚から取り外す（元のファイルは消しません）"
+        remove.toolTip = L(.removeHelp)
         cell.addSubview(remove)
         return cell
     }
 
     @objc private func removeFile(_ sender: NSButton) { model.remove(at: sender.tag) }
+    @objc private func changeLanguage(_ sender: NSPopUpButton) {
+        guard AppLanguage.allCases.indices.contains(sender.indexOfSelectedItem) else { return }
+        let language = AppLanguage.allCases[sender.indexOfSelectedItem]
+        // Do not mutate other popup menus inside AppKit's menu-tracking action.
+        DispatchQueue.main.async { [weak self] in self?.onLanguageChange?(language) }
+    }
     @objc private func changeDisplayMode(_ sender: NSPopUpButton) {
         onDisplayModeChange?(sender.indexOfSelectedItem == 0 ? .list : .icons)
     }
@@ -298,10 +400,10 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         onPlacementChange?(values[sender.indexOfSelectedItem])
     }
     @objc private func changeTransparency(_ sender: NSSlider) { onTransparencyChange?(sender.doubleValue) }
-    @objc private func changeHistoryLimit(_ sender: NSPopUpButton) {
+    @objc private func changeHistoryLimit(_ sender: NSSegmentedControl) {
         let limits = ShelfHistoryStore.supportedLimits
-        guard limits.indices.contains(sender.indexOfSelectedItem) else { return }
-        onHistoryLimitChange?(limits[sender.indexOfSelectedItem])
+        guard limits.indices.contains(sender.selectedSegment) else { return }
+        onHistoryLimitChange?(limits[sender.selectedSegment])
     }
     @objc private func toggleLogin(_ sender: NSButton) { onLoginToggle?() }
     @objc private func changeMenuBarVisibility(_ sender: NSButton) {
@@ -311,4 +413,14 @@ final class ShelfManagementWindow: NSObject, NSTableViewDataSource, NSTableViewD
         onDockVisibilityChange?(sender.state == .on)
     }
     @objc private func openInputSettings(_ sender: NSButton) { onOpenInputSettings?() }
+    @objc private func showPermissionHelp(_ sender: NSButton) {
+        let alert = NSAlert()
+        alert.messageText = L(.inputMonitoring)
+        alert.informativeText = L(.inputSettingsHelp) + "\n\n" + L(.permissionHelp)
+        alert.beginSheetModal(for: window)
+    }
+}
+
+private final class SettingsDocumentView: NSView {
+    override var isFlipped: Bool { true }
 }

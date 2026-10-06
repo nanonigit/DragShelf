@@ -66,28 +66,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         item.button?.image = NSImage(systemSymbolName: "tray.and.arrow.down.fill", accessibilityDescription: "DragShelf")
         let menu = NSMenu()
         menu.delegate = self
-        menu.addItem(NSMenuItem(title: "管理画面を開く", action: #selector(openManagement), keyEquivalent: ""))
-        let visibilityItem = NSMenuItem(title: "棚を表示", action: #selector(toggleShelf), keyEquivalent: "")
+        menu.addItem(NSMenuItem(title: L(.openManagement), action: #selector(openManagement), keyEquivalent: ""))
+        let visibilityItem = NSMenuItem(title: L(.showShelf), action: #selector(toggleShelf), keyEquivalent: "")
         menu.addItem(visibilityItem)
         self.visibilityItem = visibilityItem
         menu.addItem(.separator())
-        let countItem = NSMenuItem(title: "一時置き: 0 件", action: nil, keyEquivalent: "")
+        let countItem = NSMenuItem(title: L(.parkedCount, 0), action: nil, keyEquivalent: "")
         countItem.isEnabled = false
         menu.addItem(countItem)
         self.countItem = countItem
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "終了", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: L(.quit), action: #selector(quit), keyEquivalent: "q"))
         for entry in menu.items where entry.action != nil { entry.target = self }
         item.menu = menu
         statusItem = item
         item.isVisible = AppPresence.restored(from: .standard).menuBarVisible
         shelf.onLoginToggle = { [weak self] in self?.toggleLoginItem() }
+        shelf.onLanguageChange = { [weak self] in self?.updateMenuState() }
         shelf.onMenuBarVisibilityChange = { [weak self] in self?.setMenuBarVisibility($0) }
         shelf.onDockVisibilityChange = { [weak self] in self?.setDockVisibility($0) }
         shelf.onOpenInputSettings = { [weak self] in self?.requestInputAccess() }
         shelf.managementStatusProvider = { [weak self] in self?.managementSystemStatus() ??
-            ShelfManagementWindow.SystemStatus(inputGranted: false, detectionText: "確認中",
-                                               loginText: "確認中", loginEnabled: false,
+            ShelfManagementWindow.SystemStatus(inputGranted: false, detectionText: L(.checking),
+                                               loginText: L(.checking), loginEnabled: false,
                                                loginAvailable: false, menuBarVisible: true,
                                                dockVisible: true)
         }
@@ -215,8 +216,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let fallback = URL(fileURLWithPath: "/System/Applications/System Settings.app")
             if !NSWorkspace.shared.open(fallback) {
                 let alert = NSAlert()
-                alert.messageText = "入力監視の設定を開けませんでした"
-                alert.informativeText = "システム設定 → プライバシーとセキュリティ → 入力監視 から DragShelf を許可してください。"
+                alert.messageText = L(.inputSettingsError)
+                alert.informativeText = L(.inputSettingsHelp)
                 alert.runModal()
             }
         }
@@ -239,8 +240,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func updateMenuState() {
-        visibilityItem?.title = shelf.isVisible ? "棚を隠す" : "棚を表示"
-        countItem?.title = "一時置き: \(shelf.model.files.count) 件"
+        statusItem?.menu?.items.first?.title = L(.openManagement)
+        statusItem?.menu?.items.last?.title = L(.quit)
+        visibilityItem?.title = shelf.isVisible ? L(.hideShelf) : L(.showShelf)
+        countItem?.title = L(.parkedCount, shelf.model.files.count)
         shelf.refreshManagementSystemStatus()
     }
 
@@ -249,19 +252,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let enabled = loginAgent.isEnabled(for: Bundle.main.bundleURL)
         let loginText: String
         if loginRepairError != nil {
-            loginText = "設定エラー（もう一度切り替えてください）"
+            loginText = L(.loginErrorStatus)
         } else if enabled {
-            loginText = "有効（次回ログイン時に起動）"
+            loginText = L(.loginEnabled)
         } else {
-            loginText = oldStatus == .requiresApproval ? "旧項目の承認待ち" : "無効"
+            loginText = oldStatus == .requiresApproval ? L(.legacyLoginApproval) : L(.disabled)
         }
         let detectionText: String
         if monitor?.isRunning != true {
-            detectionText = "停止中"
+            detectionText = L(.stopped)
         } else if monitor?.mode == .eventTap {
-            detectionText = "動作中（入力監視を使用）"
+            detectionText = L(.monitorWithPermission)
         } else {
-            detectionText = "動作中（入力監視なし）"
+            detectionText = L(.monitorWithoutPermission)
         }
         return ShelfManagementWindow.SystemStatus(
             inputGranted: CGPreflightListenEventAccess(), detectionText: detectionText,
@@ -297,8 +300,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let policy: NSApplication.ActivationPolicy = visible ? .regular : .accessory
         guard NSApp.setActivationPolicy(policy), NSApp.activationPolicy() == policy else {
             let alert = NSAlert()
-            alert.messageText = "Dock アイコンの表示を変更できませんでした"
-            alert.informativeText = "アプリを再起動してから、もう一度お試しください。"
+            alert.messageText = L(.dockError)
+            alert.informativeText = L(.restartHelp)
             alert.runModal()
             shelf.refreshManagementSystemStatus()
             return
@@ -322,7 +325,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             loginRepairError = nil
         } catch {
             let alert = NSAlert()
-            alert.messageText = "ログイン時起動を変更できませんでした"
+            alert.messageText = L(.loginError)
             alert.informativeText = error.localizedDescription
             alert.runModal()
             log.error("Login item change failed: \(error.localizedDescription, privacy: .public)")

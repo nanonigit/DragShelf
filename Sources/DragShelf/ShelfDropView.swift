@@ -59,7 +59,7 @@ final class ShelfDropView: NSView, NSDraggingSource, @preconcurrency QLPreviewPa
                                  owner: self, userInfo: nil)
         addTrackingArea(area)
         hoverTrackingArea = area
-        toolTip = "ファイルをクリックし、スペースキーでプレビュー"
+        toolTip = L(.previewHelp)
     }
 
     /// Resolve the current geometry, rather than retaining an index across mutations.
@@ -219,18 +219,18 @@ final class ShelfDropView: NSView, NSDraggingSource, @preconcurrency QLPreviewPa
         NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: 14, yRadius: 14).stroke()
 
         drawControlSymbol("gearshape.fill",
-                          description: "管理画面を開く",
+                          description: L(.openManagement),
                           in: NSRect(x: 7, y: 6, width: 30, height: 30),
                           symbolInset: 6,
                           cornerRadius: 8)
-        drawModeButton("リスト", mode: .list, rect: NSRect(x: 40, y: 7, width: 51, height: 28))
-        drawModeButton("アイコン", mode: .icons, rect: NSRect(x: 95, y: 7, width: 57, height: 28))
+        drawModeButton(L(.list), mode: .list, rect: NSRect(x: 40, y: 7, width: 51, height: 28))
+        drawModeButton(L(.icons), mode: .icons, rect: NSRect(x: 95, y: 7, width: 57, height: 28))
         NSColor.separatorColor.setFill()
         NSRect(x: 8, y: 41, width: bounds.width - 16, height: 1).fill()
 
         let files = model?.files ?? []
         guard !files.isEmpty else {
-            drawText("ここにドロップ", in: NSRect(x: 12, y: 65, width: 136, height: 28),
+            drawText(L(.dropHere), in: NSRect(x: 12, y: 65, width: 136, height: 28),
                      size: 12, alignment: .center)
             return
         }
@@ -289,7 +289,7 @@ final class ShelfDropView: NSView, NSDraggingSource, @preconcurrency QLPreviewPa
     }
 
     private func drawRemoveButton(in rect: NSRect) {
-        drawControlSymbol("xmark", description: "棚から取り外す", in: rect,
+        drawControlSymbol("xmark", description: L(.remove), in: rect,
                           symbolInset: 5, cornerRadius: rect.width / 2)
     }
 

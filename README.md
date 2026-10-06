@@ -41,12 +41,17 @@ If the shelf does not appear automatically, you can show it manually from the me
 - **Safe removal.** Each × removes only the shelf entry, never the original file. Removing the last entry hides the shelf.
 - **An unobtrusive place on your desktop.** Adjust transparency from 0–60%. The shelf stays in front while it holds files.
 - **Startup and icon choices.** Enable launch at login and independently show or hide the menu-bar and Dock icons.
+- **English or Japanese.** The app starts in English. Choose **Language / 言語** in Settings to switch immediately; your choice is remembered after restarting. Native macOS dialogs follow your system language.
 
 ### Settings and parked files
 
 The shelf's gear opens management. You can also open it from the menu-bar menu or by launching DragShelf from Applications—even when both icons are hidden.
 
 Use **Settings** for appearance, placement, history size, startup, and permission controls. **Parked Items** lets you review and remove file references. The menu-bar menu also provides Show/Hide Shelf actions.
+
+Settings groups related choices under **General**, **Shelf Appearance**, **History**, and **Drag Detection**. Detailed permission troubleshooting is available through **Help**.
+
+The language selector updates Settings, the shelf, and the menu-bar menu without resetting parked files or other preferences. This feature is in the current source; the v0.1.6 release download does not include it yet.
 
 ### Install
 
@@ -122,10 +127,15 @@ ChatGPT や Claude、Cursor などの AI ツールを日常的に使うように
 - **元ファイルを消さずに片付ける。** × で取り外すのは棚の項目だけです。最後の項目を取り外すと棚が隠れます。
 - **作業に合わせた見た目。** 透明度は 0〜60% で調整でき、ファイルが入っている間は棚が手前に表示されます。
 - **起動とアイコン表示を選択。** ログイン時起動を設定でき、メニューバーと Dock のアイコンはそれぞれ表示・非表示にできます。
+- **英語・日本語を切替。** 初期表示は英語です。「設定」の **Language / 言語** で切り替えると、その場で反映され、再起動後も選択を維持します。macOS標準のダイアログはシステムの言語に従います。
 
 ### 設定と、置いたファイルの管理
 
 棚の歯車から管理画面を開けます。メニューバーのメニューや「アプリケーション」から DragShelf を起動する方法でも開けるため、両方のアイコンを隠していても設定に戻れます。
+
+言語を変更すると、設定・棚・メニューバーの文言が切り替わります。一時置きしたファイルや他の設定は初期化しません。この機能は現行ソースに含まれますが、公開済みの v0.1.6 のダウンロードにはまだ含まれていません。
+
+設定項目は「基本設定」「棚の表示」「履歴」「ドラッグ検知」にまとめています。入力監視の詳しいトラブル対処は「ヘルプ」から確認できます。
 
 「設定」には見た目・表示位置・履歴件数・起動・権限の操作をまとめています。「一時置き」では、置いたファイルへの参照を確認・取り外しできます。メニューバーからは棚を表示・非表示にできます。
 

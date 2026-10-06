@@ -104,3 +104,16 @@ The user later requested that both icons may be hidden. Store each visibility ch
 
 The duplicate shelf report was traced to two live processes: `/Applications/DragShelf.app` and the development `dist/DragShelf.app`. Each process owns exactly one `ShelfController` panel and independently retains its last selected placement, explaining why one remained near the pointer while the other moved left-bottom. Stop the development copy for immediate recovery. At startup, check for another running DragShelf bundle identifier before constructing the shelf; a subsequent launch reopens the existing app and exits without making another panel. Test by explicitly launching the staged development bundle while the installed app is running. This is a development-copy protection, not a substitute for a physical drag test.
 [Apple DTS](https://developer.apple.com/forums/thread/719862) notes that `SMAppService.Status.notFound` can mean a login item has never been registered, so that state must not disable the login toggle. The initial label is “未登録”; enabling it attempts registration and reports any error.
+
+## Language design / 言語切替の設計
+
+1. Core owns `AppLanguage` (`en`, `ja`) and an exhaustive, typed `AppText` catalog. Only the app-language preference is written; do not modify `AppleLanguages` or file history.
+2. Settings uses an always-recognizable `Language / 言語` row and native popup with `English` / `日本語` self-names. Lazyweb settings reference search informed keeping the control explicit and inside Settings rather than the menu bar.
+3. Main-actor UI refresh is explicit: management callback → controller saves language → management labels/popups refresh in place → shelf redraws → app delegate refreshes menu and current system status. No window/model/monitor recreation.
+4. Static labels register their typed text keys; the window, tab selection, and model are retained. Display/placement popups are replaced with configured controls that restore their previous selection before attachment. Retitling live popup items leaves stale rendered titles on the tested AppKit version. History uses a language-independent, single-selection 5/10/25/50/100 segmented control, making the current limit directly visible. Counts use translated format templates rather than interpolated lookup keys.
+5. Increase management vertical room for the language row and wrapping English notes. Verify English/Japanese, repeated switching, persistence, and unchanged unrelated preferences/items.
+
+6. Group settings in bordered native AppKit sections: General (language, icon choices, login startup), Shelf Appearance (mode, position, transparency), History, and Drag Detection (current mode, access state, settings action, Help). The scroll view keeps all groups reachable in a small window. Permission troubleshooting opens as a localized sheet instead of occupying the main form.
+7. Defer the language callback to the next main-queue turn so other popup menus are not mutated during language-menu tracking. Verify actual rendered count titles after menu dismissal, not only selected indices.
+
+日本語: 共通の型付き文言一覧を使用し、変更時は既存UIの文言だけを更新する。設定・ファイル履歴・ドラッグ検知を作り直さない。OS提供のダイアログは翻訳対象外。
