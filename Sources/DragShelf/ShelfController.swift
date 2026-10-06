@@ -34,7 +34,7 @@ final class ShelfController {
         displayMode = ShelfDisplayMode(rawValue: UserDefaults.standard.string(forKey: "shelfDisplayMode") ?? "") ?? .icons
         placement = ShelfPlacement(rawValue: UserDefaults.standard.string(forKey: "shelfPlacement") ?? "") ?? .nearDrag
         transparencyPercent = min(60, max(0, UserDefaults.standard.double(forKey: "shelfTransparencyPercent")))
-        panel = NSPanel(
+        panel = ShelfPanel(
             contentRect: NSRect(x: 0, y: 0, width: ShelfLayout.width, height: 112),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
@@ -47,12 +47,14 @@ final class ShelfController {
         dropView.onDisplayModeChange = { [weak self] mode in self?.setDisplayMode(mode) }
         dropView.onOpenManagement = { [weak self] in self?.openManagement() }
         panel.contentView = dropView
+        panel.delegate = dropView
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = true
         panel.alphaValue = 1 - transparencyPercent / 100
         panel.level = .floating
         panel.hidesOnDeactivate = false
+        panel.becomesKeyOnlyIfNeeded = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         model.didChange = { [weak self] in self?.refresh() }
         previews.didUpdate = { [weak self] in
@@ -73,6 +75,7 @@ final class ShelfController {
     }
 
     func hide() {
+        dropView.endPreviewInteraction()
         panel.orderOut(nil)
     }
 
@@ -156,6 +159,7 @@ final class ShelfController {
                                         panelSize: panel.frame.size,
                                         pointer: lastPointer,
                                         placement: placement)
+        if panel.frame.origin != origin { dropView.endPreviewInteraction() }
         panel.setFrameOrigin(origin)
     }
 }

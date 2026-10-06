@@ -1,5 +1,11 @@
 # DragShelf design
 
+## Quick Look
+
+Lazyweb's desktop file-preview search returned adjacent web file browsers, not a macOS hover/Space precedent. Preserve the existing shelf and use Apple's native [QLPreviewPanel](https://developer.apple.com/documentation/quicklookui/qlpreviewpanel) instead of inventing a viewer. The user approved clicking to obtain focus. A key-capable nonactivating shelf panel takes local keyboard focus only when an available file is clicked, not merely hovered; no global keyboard monitor or additional permission is introduced. An always-active tracking area records the hovered point, and each Space press resolves the current item using current geometry and scroll offset; never retain an array index across model changes. Release shelf focus on exit, over controls, during a drag, or when hidden. Highlight the targeted row and expose a Space tooltip.
+
+`ShelfDropView` owns the preview URL and participates in the documented Quick Look responder-chain control lifecycle, also serving as the shelf's window delegate. It installs and removes the data source/delegate only in begin/end control callbacks. Show the preview window before reloading its data so AppKit has acquired a controller. Preview data is a single file URL; unmodified Space toggles the same file or switches to another hovered item. Escape closes, repeats do nothing, and removal/hiding closes an owned preview. Preview focus is not stolen merely because the cursor moves from the shelf into the preview. AppKit tests cover hover hit testing, modifiers/repeats, scrolling and mutation. The optional native-window lifecycle test skips when the unhosted XCTest runner cannot acquire key focus; installed-app checks cover that path instead.
+
 ## Core distinction
 
 `NSDraggingDestination` only reports a drag once it reaches DragShelf's registered window/view. It cannot announce a drag that has just begun in Finder. Automatic reveal therefore uses two independent public signals:

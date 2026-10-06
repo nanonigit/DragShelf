@@ -1,5 +1,15 @@
 # Verification record
 
+## 2026-10-06 — v0.1.6 Quick Look
+
+- Added native `QLPreviewPanel` with click-to-focus Space handling, following the user's approval to use a click. Merely hovering does not take focus. No keyboard monitor or new TCC permission is added.
+- `swift test`: 23 passed, 0 failed, 1 skipped. Four new AppKit tests cover list/icon targets, header/remove/outside/empty/missing exclusions, scroll/model changes, and modified/repeated keys. The optional native preview lifecycle test skips because this unhosted XCTest process cannot acquire AppKit key focus; this is not counted as a passed interaction test.
+- Built and installed the final release bundle at `/Applications/DragShelf.app`. In both icon and list modes, clicking the test-file body and pressing Space showed a **Quick Look** window with title **sample.txt** and text **DragShelf integration test fixture.** Space again closed it; Escape also closed it in the final installed release. These are native UI checks, not a physical Finder drag test.
+- The shelf was empty before testing. Temporarily added only the repository's sample.txt reference, then removed that reference while preserving any other entries, restored the prior icon display preference, and reopened management. Original files were not modified.
+- Release build and nested `codesign --verify --deep --strict` passed. The app remains ad-hoc signed/unnotarized and `spctl` rejects it as expected. The rebuilt app reports Input Monitoring absent and uses the AppKit fallback; granting it again is a user action and is not required by Quick Look.
+- The release ZIP passed `unzip -t`; SHA-256: `11f5a8fca053c0c2f6c53b9ea8d659c3a675509e25f713d7674f67b84a41918f`.
+- Still pending: a physical keyboard-focus-return check after moving from the shelf to another app, full-screen/multi-display preview, missing-file deletion while a native preview is open, and broader file-type coverage.
+
 ## 2026-09-28 — Phase 1 implementation
 
 - Xcode 27.0 / Swift 6.4 on macOS 27.0 (arm64).

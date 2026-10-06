@@ -17,6 +17,7 @@ Provide a temporary drop shelf for dragging files between macOS windows, Spaces,
 
 ## Phase 2: usable file shelf
 
+- Click a parked file to focus the shelf, then press unmodified Space to open native macOS Quick Look, in either display mode and after scrolling. While the shelf has focus, Space previews the hovered item. Space again or Escape closes the preview. Exclude header/removal controls and unavailable files, suppress repeats and drags, and release keyboard focus when leaving the shelf. Merely hovering must not steal keyboard focus. Do not require keyboard monitoring or alter original files.
 - Park multiple files and folders, display their names/icons, remove individual entries, and drag entries to another app.
 - Show a useful content preview where macOS can generate one, with a file icon fallback. Let the user switch between compact list and larger icon views; preserve the choice across launches.
 - Keep the shelf narrow (about half its initial 320-point width); do not waste horizontal space in icon view. Remove the shelf title and provide a gear control that opens management.

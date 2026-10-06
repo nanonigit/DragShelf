@@ -14,5 +14,6 @@ let package = Package(
         .executableTarget(name: "DragShelf", dependencies: ["DragShelfCore"]),
         .executableTarget(name: "DragShelfLoginItem"),
         .testTarget(name: "DragShelfCoreTests", dependencies: ["DragShelfCore"]),
+        .testTarget(name: "DragShelfAppTests", dependencies: ["DragShelf", "DragShelfCore"]),
     ]
 )
