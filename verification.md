@@ -8,6 +8,7 @@
 - The shelf was empty before testing. Temporarily added only the repository's sample.txt reference, then removed that reference while preserving any other entries, restored the prior icon display preference, and reopened management. Original files were not modified.
 - Release build and nested `codesign --verify --deep --strict` passed. The app remains ad-hoc signed/unnotarized and `spctl` rejects it as expected. The rebuilt app reports Input Monitoring absent and uses the AppKit fallback; granting it again is a user action and is not required by Quick Look.
 - The release ZIP passed `unzip -t`; SHA-256: `11f5a8fca053c0c2f6c53b9ea8d659c3a675509e25f713d7674f67b84a41918f`.
+- Published [v0.1.6](https://github.com/nanonigit/DragShelf/releases/tag/v0.1.6) as a prerelease with ZIP/checksum and English/Japanese notes; the main branch was pushed. Updated `homebrew-DragShelf` to the same version/checksum, fast-forwarded the installed tap, and successfully fetched **Cask dragshelf (0.1.6)**.
 - Still pending: a physical keyboard-focus-return check after moving from the shelf to another app, full-screen/multi-display preview, missing-file deletion while a native preview is open, and broader file-type coverage.
 
 ## 2026-09-28 — Phase 1 implementation

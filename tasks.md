@@ -6,7 +6,7 @@
 - [x] Test both layouts, control/empty/missing exclusions, scroll/mutation and repeat/modifier filtering. Native lifecycle needs an app-hosted runner or installed-app verification.
 - [x] Build/install `/Applications/DragShelf.app` and verify click Space in list/icon views, Space-close and Escape-close on the final release build.
 - [ ] Physically verify keyboard focus returns to another app when leaving the shelf, plus full-screen and multi-display preview behavior.
-- [ ] Update English/Japanese usage notes and publish source, release, and Homebrew cask.
+- [x] Update English/Japanese usage notes and publish source, release, and Homebrew cask.
 
 ## Phase 1
 
