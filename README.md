@@ -4,6 +4,10 @@
 
 **ウィンドウを切り替えるときも、ファイルの受け渡しをスムーズに。**
 
+<p align="center">
+  <img src="assets/demo.gif" alt="DragShelf Demo" width="720">
+</p>
+
 [English](#english) · [日本語](#日本語)
 
 ## English
