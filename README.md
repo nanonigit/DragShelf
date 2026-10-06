@@ -1,75 +1,163 @@
 # DragShelf
 
-DragShelf is an experimental macOS shelf for temporarily parking files during drag and drop. It reveals a narrow drop target while you drag a file from Finder, and lets you drag parked files onward later. It does **not** move, delete, or copy the source file when parking it.
+**A place to put files down before you drag them somewhere else.**
 
-DragShelf は、ドラッグ中のファイルを一時的に置くための macOS アプリです。Finder などからファイルをドラッグすると細い棚を表示し、置いたファイルを後で別の場所へドラッグできます。一時置き時に元ファイルを移動・削除・複製しません。
+**ファイルをいったん置いて、移動先を開いてから、もう一度ドラッグ。**
+
+[English](#english) · [日本語](#日本語)
 
 ## English
 
-### Requirements and installation
+### Stop holding the mouse button while you find the destination
 
-- macOS 14 or later. The v0.1.6 binary is for Apple Silicon (arm64) Macs only. The source build requires Xcode/Swift with Swift Package Manager.
-- Download `DragShelf-0.1.6-macos-arm64.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and move `DragShelf.app` to Applications.
-- Alternatively, use the [dedicated tap](https://github.com/nanonigit/homebrew-DragShelf): `brew tap nanonigit/dragshelf && brew install --cask dragshelf`.
+Dragging a file is easy when its destination is already visible. It becomes awkward when you need to switch apps, find a buried window, or navigate to another folder while keeping the mouse button pressed.
 
-**Distribution warning:** v0.1.6 is ad-hoc signed, not Developer ID signed or notarized. macOS Gatekeeper may block the downloaded app. Review the source and release before allowing it in **System Settings → Privacy & Security**. The Homebrew tap does not bypass Gatekeeper. If you prefer not to make a security exception, build from source or wait for a notarized release.
-With ad-hoc signatures, an updated build may lose macOS Input Monitoring access even if its switch still looks enabled. The management window reports the app's actual access check and active detection mode; the AppKit fallback remains available.
+DragShelf gives you a small shelf on your Mac so you can pause a drag and continue it later:
 
-### Use
+1. **Put it down.** Start dragging a file or folder from Finder. When the shelf appears, drop it onto the shelf and release the mouse button.
+2. **Find the destination.** Switch windows or apps and open the folder or document you need, with your mouse free.
+3. **Pick it up again.** Drag the file from the shelf to the destination.
 
-Drag a file or folder from Finder. When the shelf appears, drop it there. Drag a parked item out to Finder or another app. The menu-bar icon offers management and Show/Hide Shelf. The gear on the shelf also opens management. Management opens on **Settings** (left tab); **Parked Items** is the right tab. Settings contains list/icon display, five placement choices (four corners or near the dragged file), shelf transparency (0–60%), menu-bar and Dock icon visibility, launch at login, Input Monitoring, and the history limit (5/10/25/50/100 items, default 25). Both icons may be hidden; reopen DragShelf from Applications to return to management. A second copy of DragShelf exits instead of showing another shelf. Removing the last item hides the shelf.
-The gear and each item's remove control use white symbols on dark, outlined buttons so they remain visible against dark previews.
+The shelf is an intermediate stop, not a new folder. Parking a file stores a reference to it; it does not move, duplicate, or delete the original.
 
-To preview a parked file, click its thumbnail or name to focus the shelf, keep the pointer over the file, and press **Space**. Native macOS Quick Look opens without launching the file's app. Press Space again or **Esc** to close. This works in list and icon views; missing files and remove/settings controls are excluded. Merely hovering does not take keyboard focus, and previewing needs no extra keyboard-monitoring permission.
+### When it helps
 
-On launch, DragShelf requests Input Monitoring once if it is missing. The button in management opens the relevant System Settings pane. macOS permission must be granted by you; DragShelf cannot grant it. Drag detection also has an AppKit fallback that may work without this permission. Management reports which mode is running.
+- **The destination is behind another window.** Park the file, bring the destination forward, then drag it out of the shelf.
+- **You need to prepare an attachment or upload.** Put the file on the shelf before opening the message or upload form, then drag it into an accepting app.
+- **Files are in different folders.** Park them as you find them so they are together on the shelf when you are ready to use them.
 
-Launch at login uses a per-user LaunchAgent stored at `~/Library/LaunchAgents/com.github.nanonigit.DragShelf.startAtLogin.plist`. It opens the installed `/Applications/DragShelf.app` quietly; turning the setting off removes only that file. v0.1.5 migrates an enabled legacy login item automatically because macOS rejected its ad-hoc-signed helper at launch. The job was tested by loading it in the current session; an actual logout/login still needs user confirmation.
+DragShelf is designed to help with switching between windows, apps, and Spaces. It is still experimental: drag detection and destination compatibility vary, and full-screen and multi-display workflows need broader hands-on testing.
 
-Parked file references are stored locally and restored after a restart; file contents are not copied. If the item count exceeds your chosen limit, oldest references are removed from the shelf, never from the disk. Moved files are usually tracked by macOS bookmarks; missing files remain listed as unavailable until you remove them or restore the originals. Only local file and folder URLs are currently supported. Cross-app reveal, full-screen Spaces, multi-display placement, and outgoing drops still need broader hands-on validation; see [verification.md](verification.md).
+### More than a drop target
+
+- **Recognize what you parked.** List and icon views show filenames and thumbnails where macOS can generate them, with file icons as a fallback.
+- **Check a file before using it.** Click its thumbnail or name, keep the pointer over it, and press **Space** for native Quick Look. Press Space again or **Esc** to close.
+- **Pick up where you left off.** File references survive an app restart. Choose a maximum of 5, 10, 25, 50, or 100 entries (default: 25); exceeding it removes the oldest references from the shelf, not the disk.
+- **Clear the shelf safely.** Each × removes an entry from DragShelf only. Removing the last entry hides the shelf.
+
+DragShelf is not a backup, cloud drive, or clipboard recorder. It currently accepts local files and folders, not arbitrary text, URLs, images copied from apps, or promised downloads. The original file must remain available for its reference to be useful. Missing files remain listed as unavailable; bookmarks can usually follow moved files, but recovery is not guaranteed.
+
+### Make the shelf fit your workspace
+
+Open management from the shelf's gear, the menu-bar menu, or by opening DragShelf from Applications. **Settings** contains the shelf's appearance, history limit, and startup options; **Parked Items** lets you review and remove entries.
+
+You can choose any of the four screen corners or a position near the dragged file, switch between list and icon views, and adjust transparency from 0–60%. The shelf stays in front while it holds files. You can also enable launch at login and choose whether to show the menu-bar and Dock icons. Even with both icons hidden, opening DragShelf from Applications brings back management. The menu-bar menu provides manual Show/Hide Shelf actions.
+
+### Install
+
+Requirements: **macOS 14 or later**. The current v0.1.6 download is for **Apple Silicon (arm64)** Macs.
+
+**Signing notice:** the app is ad-hoc signed, not Developer ID signed or notarized. Gatekeeper may block a downloaded copy. Review the source and release before deciding whether to allow it in **System Settings → Privacy & Security**. The Homebrew tap does not bypass Gatekeeper.
+
+With the [dedicated Homebrew tap](https://github.com/nanonigit/homebrew-DragShelf):
+
+```bash
+brew tap nanonigit/dragshelf
+brew install --cask dragshelf
+```
+
+Or download `DragShelf-0.1.6-macos-arm64.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and put `DragShelf.app` in **Applications**.
+
+### Permissions and current limitations
+
+DragShelf requests **Input Monitoring** at launch when it is not granted, to support drag detection. You control this permission in macOS; management shows the app's actual access check and active detection mode. An AppKit fallback may work without Input Monitoring. Manual shelf use remains available, and Quick Look needs no additional keyboard-monitoring permission.
+
+Ad-hoc-signed updates can invalidate Input Monitoring access even when its switch still looks on. If management reports it as unavailable after an update, re-grant permission for the installed app in System Settings and restart DragShelf.
+
+Launch at login starts the installed app quietly, without opening management. Its startup job has been tested in a running session, but a real logout/login still needs user confirmation. Before uninstalling, turn this option off in DragShelf.
+
+For measured results and open checks—including cross-app drops, full-screen Spaces, multiple displays, and keyboard-focus return—see [verification.md](verification.md).
 
 ### Build from source
 
+Requires Xcode/Swift with Swift Package Manager.
+
 ```bash
+git clone https://github.com/nanonigit/DragShelf.git
+cd DragShelf
 swift test
-bash script/build_and_run.sh
+bash script/build_and_run.sh --build-only
 ```
 
-`bash script/build_and_run.sh --build-only` builds and stages `dist/DragShelf.app` without restarting a running shelf. `bash script/package_release.sh 0.1.6` creates a release zip and SHA-256 checksum in `releases/`. A normal launch opens management on the Settings tab; login launch stays in the background.
+Copy the resulting `dist/DragShelf.app` to **Applications** and open it there. The build-only command does not restart an existing instance. Development and release procedures are in [design.md](design.md) and [verification.md](verification.md).
 
 ## 日本語
 
-### 動作環境とインストール
+### 移動先を探す間、マウスを押し続けなくていい
 
-- macOS 14 以降。v0.1.6 の配布バイナリは Apple Silicon（arm64）Mac 専用です。ソースからのビルドには Swift Package Manager を使える Xcode/Swift が必要です。
-- [GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.1.6-macos-arm64.zip` を取得し、展開した `DragShelf.app` を「アプリケーション」へ移します。
-- [専用 tap](https://github.com/nanonigit/homebrew-DragShelf) からは `brew tap nanonigit/dragshelf && brew install --cask dragshelf` でインストールできます。
+ファイルの移動先が見えていれば、ドラッグ＆ドロップは簡単です。でも、別のアプリへ切り替えたり、奥に隠れたウィンドウを開いたり、別のフォルダへ移動したりする間も、マウスのボタンを押し続けるのは面倒です。
 
-**配布上の注意:** v0.1.6 はアドホック署名のみで、Developer ID 署名・公証はありません。ダウンロードしたアプリは Gatekeeper に止められる場合があります。ソースと配布物を確認したうえで「システム設定 → プライバシーとセキュリティ」から許可してください。Homebrew tap は Gatekeeper を自動で回避しません。セキュリティの例外設定を避けたい場合は、ソースからビルドするか、公証済み版をお待ちください。
-アドホック署名版では、更新後に入力監視のスイッチが ON に見えてもアプリ側の許可が失われる場合があります。管理画面にはアプリ側の実際の判定とドラッグ検知方式を表示します。入力監視なしの AppKit 方式も利用できます。
+DragShelf は、ドラッグを途中で区切り、あとから続けられるようにする、Mac の小さな「一時置きの棚」です。
 
-### 使い方
+1. **いったん置く。** Finder からファイルやフォルダをドラッグし、現れた棚にドロップします。ここでマウスのボタンを離せます。
+2. **移動先を開く。** 手を自由にしてウィンドウやアプリを切り替え、目的のフォルダや書類を開きます。
+3. **棚から取り出す。** 棚のファイルを、開いた移動先へドラッグします。
 
-Finder からファイルやフォルダをドラッグし、現れた棚にドロップします。棚から Finder や別のアプリへ再びドラッグできます。メニューバーには管理画面と棚の表示・非表示を残しました。棚の歯車からも管理画面を開けます。管理画面は左側の「設定」を最初に表示し、右側に「一時置き」があります。設定にはリスト／アイコン表示、5種類の表示位置（四隅またはドラッグ中のファイルの近く）、透明度（0〜60%）、メニューバーと Dock のアイコンの表示・非表示、ログイン時起動、入力監視、履歴の上限（5／10／25／50／100 件、初期値 25 件）をまとめています。両方のアイコンを隠しても、「アプリケーション」から DragShelf を開けば管理画面に戻れます。別の DragShelf を起動しても、棚は二重に表示しません。最後の項目を削除すると棚が隠れます。
-歯車と各項目の削除ボタンは、暗いプレビューの上でも見えるよう、縁取りのある暗いボタンに白い記号で表示します。
+棚は、新しい保存先のフォルダではなく、ドラッグの途中で立ち寄る場所です。保存するのはファイルへの参照だけで、棚に置くときに元ファイルを移動・複製・削除することはありません。
 
-棚のファイルのサムネイルや名前をクリックしてフォーカスを取り、カーソルをそのファイルの上に置いて **スペースキー** を押すと、Mac 標準のクイックルックで内容を確認できます。もう一度スペースキー、または **Esc** で閉じます。リスト／アイコンの両方に対応し、見つからないファイルや削除・設定ボタンでは開きません。カーソルを合わせただけではキーフォーカスを奪わず、プレビューのための追加のキーボード監視権限も不要です。
+### こんなときに便利です
 
-起動時、入力監視の許可がなければ macOS に一度だけ要求します。管理画面のボタンからシステム設定の該当画面を開けます。許可は利用者自身が行う必要があります。入力監視なしでも AppKit によるドラッグ検知が動く場合があり、現在の動作方式は管理画面に表示されます。
+- **移動先が別のウィンドウの裏にある。** 棚に置いてから移動先を手前に出し、棚からドラッグできます。
+- **添付やアップロードの画面をまだ開いていない。** 先にファイルを棚へ置き、メッセージやアップロード画面を準備してから、ファイルを受け取れるアプリへ渡せます。
+- **使いたいファイルが別々のフォルダにある。** 見つけたものから棚に集め、使うときに取り出せます。
 
-ログイン時起動には `~/Library/LaunchAgents/com.github.nanonigit.DragShelf.startAtLogin.plist` を使い、インストール済みの `/Applications/DragShelf.app` を管理画面なしで開きます。設定をオフにすると、この専用ファイルだけを取り除きます。v0.1.5 では、macOS に起動を拒否されていた旧方式のログイン項目が有効な場合に限り、自動で移行します。現在のセッションで起動テストは通りましたが、実際のログアウト／ログイン後の確認は利用者による検証が必要です。
+ウィンドウ・アプリ・Spaces を切り替える場面での利用を想定しています。ただし、現時点では実験的なアプリです。ドラッグ検知や受け渡し先との相性には差があり、フルスクリーンや複数ディスプレイでの動作は追加の実機検証が必要です。
 
-棚に置いたファイルへの参照はこの Mac に保存され、アプリ終了・再起動後も復元されます。ファイル本体はコピーしません。設定した上限を超えると古い参照から棚を外しますが、元ファイルは削除しません。移動したファイルは通常 macOS のブックマークで追跡でき、見つからないファイルは利用不可として表示します。現時点ではローカルのファイル／フォルダ URL のみ対応します。アプリ間の自動表示、フルスクリーン、複数ディスプレイ、棚からのドラッグ先は追加の実機検証が必要です。詳細は [verification.md](verification.md) を参照してください。
+### 置いたあとも、探しやすく・使いやすく
+
+- **何を置いたか見える。** リスト／アイコン表示でファイル名を確認でき、macOS が生成できる場合はサムネイルも表示します。生成できない場合はファイルのアイコンを使います。
+- **使う前に中身を確認できる。** サムネイルや名前をクリックし、カーソルをその上に置いて **スペースキー** を押すと、標準のクイックルックでプレビューできます。もう一度スペースキー、または **Esc** で閉じます。
+- **再起動後も続きを使える。** ファイルへの参照はアプリを終了しても残ります。保存件数は 5／10／25／50／100 件から選択でき、初期値は 25 件です。上限を超えると、古い参照から棚を外します。ディスク上のファイルは消しません。
+- **棚だけを片付けられる。** 各項目の × は棚から取り外すためのボタンです。元ファイルは削除しません。最後の項目を取り外すと棚が隠れます。
+
+DragShelf は、バックアップ・クラウドストレージ・クリップボードの自動記録アプリではありません。現在対応するのはローカルのファイルとフォルダです。アプリから取り出した任意のテキストや URL、コピーした画像、未完了のダウンロードなどには対応していません。参照先の元ファイルは引き続き必要です。見つからないファイルは利用不可として残り、移動したファイルは通常ブックマークで追跡できますが、必ず復元できるとは限りません。
+
+### 自分の作業環境に合わせる
+
+棚の歯車、メニューバーのメニュー、または「アプリケーション」から DragShelf を開くと、管理画面を表示できます。「設定」には棚の見た目・履歴件数・起動の設定を、「一時置き」には置いたファイルの確認と取り外しをまとめています。
+
+棚の位置は画面の四隅、またはドラッグ中のファイルの近くから選べます。リスト／アイコン表示と透明度（0〜60%）も変更できます。ファイルが入っている間、棚は手前に表示されます。ログイン時の自動起動、メニューバーと Dock のアイコン表示も選べます。両方のアイコンを隠しても、「アプリケーション」から DragShelf を開けば管理画面に戻れます。メニューバーからは棚を手動で表示・非表示にできます。
+
+### インストール
+
+動作環境は **macOS 14 以降**です。現在の v0.1.6 の配布バイナリは **Apple Silicon（arm64）Mac 用**です。
+
+**署名について:** 配布版はアドホック署名のみで、Developer ID 署名・公証はありません。ダウンロードしたアプリは Gatekeeper に止められる場合があります。ソースと配布物を確認し、許可する場合は「システム設定 → プライバシーとセキュリティ」から操作してください。Homebrew tap は Gatekeeper を自動で回避しません。
+
+[専用 Homebrew tap](https://github.com/nanonigit/homebrew-DragShelf) を使う場合:
+
+```bash
+brew tap nanonigit/dragshelf
+brew install --cask dragshelf
+```
+
+または、[GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.1.6-macos-arm64.zip` を取得し、展開した `DragShelf.app` を **「アプリケーション」**へ置きます。
+
+### 権限と、現在の制限
+
+ドラッグ検知のため、未許可の場合は起動時に **入力監視**の許可を求めます。許可は利用者自身が macOS で操作するもので、管理画面にはアプリ側の実際の判定と検知方式を表示します。入力監視なしでも AppKit による代替方式が動く場合があります。棚の手動操作は引き続き利用でき、クイックルックのための追加のキーボード監視権限は不要です。
+
+アドホック署名版では、更新後に入力監視のスイッチが ON のままでも許可が失われる場合があります。管理画面で未許可になっているときは、システム設定でインストール済みアプリへの許可を設定し直し、DragShelf を再起動してください。
+
+ログイン時起動では、インストール済みアプリを管理画面なしで起動します。起動ジョブは動作中のセッションで検証していますが、実際のログアウト／ログイン後の確認はまだ必要です。アンインストール前には、DragShelf のこの設定をオフにしてください。
+
+アプリ間の受け渡し、フルスクリーン、複数ディスプレイ、棚から離れた際のキーフォーカスなど、検証済みの範囲と未確認の項目は [verification.md](verification.md) に記録しています。
 
 ### ソースからビルド
 
+Swift Package Manager を使える Xcode／Swift が必要です。
+
 ```bash
+git clone https://github.com/nanonigit/DragShelf.git
+cd DragShelf
 swift test
-bash script/build_and_run.sh
+bash script/build_and_run.sh --build-only
 ```
 
-`bash script/build_and_run.sh --build-only` は動作中の棚を再起動せず `dist/DragShelf.app` を作ります。`bash script/package_release.sh 0.1.6` は `releases/` に ZIP と SHA-256 を作ります。通常起動では管理画面の「設定」タブが開き、ログイン時起動では背後で動きます。
+生成された `dist/DragShelf.app` を **「アプリケーション」**へコピーし、そこから開きます。`--build-only` は動作中のアプリを再起動しません。開発・配布の手順は [design.md](design.md) と [verification.md](verification.md) を参照してください。
 
-Design and development notes / 設計・開発記録: [requirements.md](requirements.md), [design.md](design.md), [tasks.md](tasks.md), [verification.md](verification.md).
+---
+
+Development notes / 開発記録: [Requirements / 要件](requirements.md) · [Design / 設計](design.md) · [Tasks / 作業項目](tasks.md) · [Verification / 検証記録](verification.md)
 
 License / ライセンス: [MIT](LICENSE).
