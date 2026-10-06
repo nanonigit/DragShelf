@@ -1,47 +1,44 @@
 # DragShelf
 
-**A place to put files down before you drag them somewhere else.**
+**Drag files between windows and apps, at your own pace.**
 
-**ファイルをいったん置いて、移動先を開いてから、もう一度ドラッグ。**
+**ウィンドウを切り替えるときも、ファイルの受け渡しをスムーズに。**
 
 [English](#english) · [日本語](#日本語)
 
 ## English
 
-### Stop holding the mouse button while you find the destination
+### A small shelf for easier drag and drop
 
-Dragging a file is easy when its destination is already visible. It becomes awkward when you need to switch apps, find a buried window, or navigate to another folder while keeping the mouse button pressed.
+DragShelf is a macOS utility for handing files from one window or app to another. It adds a place to set files aside while you prepare their destination.
 
-DragShelf gives you a small shelf on your Mac so you can pause a drag and continue it later:
+When DragShelf detects a supported file drag, it reveals a compact shelf at your chosen screen corner or near the pointer. Drop your file onto it and let go of the mouse button. You can then bring another window forward, switch apps or Spaces, and find the destination without keeping a drag held down. When you are ready, drag the file from the shelf to where you need it.
 
-1. **Put it down.** Start dragging a file or folder from Finder. When the shelf appears, drop it onto the shelf and release the mouse button.
-2. **Find the destination.** Switch windows or apps and open the folder or document you need, with your mouse free.
-3. **Pick it up again.** Drag the file from the shelf to the destination.
+Use it to keep a document handy while composing an attachment, prepare a file before opening an upload form, or gather files from different folders for later use. Parking stores a reference to the original file—not a new copy—and does not move or delete it.
 
-The shelf is an intermediate stop, not a new folder. Parking a file stores a reference to it; it does not move, duplicate, or delete the original.
+### How to use it
 
-### When it helps
+1. Drag a local file or folder from Finder onto the shelf when it appears.
+2. Release the mouse button and open the destination.
+3. Drag the item from the shelf into a folder or an app that accepts files.
 
-- **The destination is behind another window.** Park the file, bring the destination forward, then drag it out of the shelf.
-- **You need to prepare an attachment or upload.** Put the file on the shelf before opening the message or upload form, then drag it into an accepting app.
-- **Files are in different folders.** Park them as you find them so they are together on the shelf when you are ready to use them.
+If the shelf does not appear automatically, you can show it manually from the menu-bar menu.
 
-DragShelf is designed to help with switching between windows, apps, and Spaces. It is still experimental: drag detection and destination compatibility vary, and full-screen and multi-display workflows need broader hands-on testing.
+### Features
 
-### More than a drop target
+- **A shelf that appears during a file drag.** Choose any of the four screen corners or a position near the dragged file.
+- **Files you can recognize at a glance.** Switch between list and icon views, with filenames, thumbnails where available, and file-icon fallbacks.
+- **Quick Look without opening another app.** Click an item's thumbnail or name, keep the pointer over it, and press **Space**. Press Space again or **Esc** to close.
+- **A shelf that remembers its contents.** File references survive an app restart. Choose a limit of 5, 10, 25, 50, or 100 entries (default: 25); the oldest references leave the shelf when the limit is exceeded.
+- **Safe removal.** Each × removes only the shelf entry, never the original file. Removing the last entry hides the shelf.
+- **An unobtrusive place on your desktop.** Adjust transparency from 0–60%. The shelf stays in front while it holds files.
+- **Startup and icon choices.** Enable launch at login and independently show or hide the menu-bar and Dock icons.
 
-- **Recognize what you parked.** List and icon views show filenames and thumbnails where macOS can generate them, with file icons as a fallback.
-- **Check a file before using it.** Click its thumbnail or name, keep the pointer over it, and press **Space** for native Quick Look. Press Space again or **Esc** to close.
-- **Pick up where you left off.** File references survive an app restart. Choose a maximum of 5, 10, 25, 50, or 100 entries (default: 25); exceeding it removes the oldest references from the shelf, not the disk.
-- **Clear the shelf safely.** Each × removes an entry from DragShelf only. Removing the last entry hides the shelf.
+### Settings and parked files
 
-DragShelf is not a backup, cloud drive, or clipboard recorder. It currently accepts local files and folders, not arbitrary text, URLs, images copied from apps, or promised downloads. The original file must remain available for its reference to be useful. Missing files remain listed as unavailable; bookmarks can usually follow moved files, but recovery is not guaranteed.
+The shelf's gear opens management. You can also open it from the menu-bar menu or by launching DragShelf from Applications—even when both icons are hidden.
 
-### Make the shelf fit your workspace
-
-Open management from the shelf's gear, the menu-bar menu, or by opening DragShelf from Applications. **Settings** contains the shelf's appearance, history limit, and startup options; **Parked Items** lets you review and remove entries.
-
-You can choose any of the four screen corners or a position near the dragged file, switch between list and icon views, and adjust transparency from 0–60%. The shelf stays in front while it holds files. You can also enable launch at login and choose whether to show the menu-bar and Dock icons. Even with both icons hidden, opening DragShelf from Applications brings back management. The menu-bar menu provides manual Show/Hide Shelf actions.
+Use **Settings** for appearance, placement, history size, startup, and permission controls. **Parked Items** lets you review and remove file references. The menu-bar menu also provides Show/Hide Shelf actions.
 
 ### Install
 
@@ -59,6 +56,10 @@ brew install --cask dragshelf
 Or download `DragShelf-0.1.6-macos-arm64.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and put `DragShelf.app` in **Applications**.
 
 ### Permissions and current limitations
+
+DragShelf currently accepts local files and folders. Arbitrary text, web URLs, non-file app content, clipboard recording, and promised downloads are not supported. It is not a backup or cloud drive: original files must remain available. Missing references remain listed as unavailable, and bookmarks may follow moved files but cannot guarantee recovery.
+
+Automatic drag detection and receiving-app compatibility can vary. Full-screen and multi-display workflows still need broader hands-on testing.
 
 DragShelf requests **Input Monitoring** at launch when it is not granted, to support drag detection. You control this permission in macOS; management shows the app's actual access check and active detection mode. An AppKit fallback may work without Input Monitoring. Manual shelf use remains available, and Quick Look needs no additional keyboard-monitoring permission.
 
@@ -83,40 +84,37 @@ Copy the resulting `dist/DragShelf.app` to **Applications** and open it there. T
 
 ## 日本語
 
-### 移動先を探す間、マウスを押し続けなくていい
+### ファイルの受け渡しに、小さな一時置きの棚を
 
-ファイルの移動先が見えていれば、ドラッグ＆ドロップは簡単です。でも、別のアプリへ切り替えたり、奥に隠れたウィンドウを開いたり、別のフォルダへ移動したりする間も、マウスのボタンを押し続けるのは面倒です。
+DragShelf は、Mac のウィンドウやアプリの間でファイルを渡す操作を助けるユーティリティです。移動先を準備する間、ファイルを手元に置いておける棚を用意します。
 
-DragShelf は、ドラッグを途中で区切り、あとから続けられるようにする、Mac の小さな「一時置きの棚」です。
+対応するファイルのドラッグを検知すると、画面の四隅やカーソルの近くなど、指定した位置に小さな棚が現れます。そこへファイルを置けば、マウスのボタンを離せます。別のウィンドウを手前に出したり、アプリや Spaces を切り替えたりして、落ち着いて移動先を開いてください。準備ができたら、棚から目的の場所へドラッグして渡せます。
 
-1. **いったん置く。** Finder からファイルやフォルダをドラッグし、現れた棚にドロップします。ここでマウスのボタンを離せます。
-2. **移動先を開く。** 手を自由にしてウィンドウやアプリを切り替え、目的のフォルダや書類を開きます。
-3. **棚から取り出す。** 棚のファイルを、開いた移動先へドラッグします。
+メールを書き始める前に添付する書類を置く。アップロード画面を開く前にファイルを用意する。別々のフォルダにあるファイルを集めておく。そんな場面で、棚がファイルの受け渡しの中継地点になります。棚に保存するのは元ファイルへの参照だけで、置くときにファイル本体を複製・移動・削除することはありません。
 
-棚は、新しい保存先のフォルダではなく、ドラッグの途中で立ち寄る場所です。保存するのはファイルへの参照だけで、棚に置くときに元ファイルを移動・複製・削除することはありません。
+### 基本の使い方
 
-### こんなときに便利です
+1. Finder からローカルのファイルやフォルダをドラッグし、現れた棚に置きます。
+2. マウスのボタンを離し、移動先を開きます。
+3. 棚から、ファイルを受け取れるフォルダやアプリへドラッグします。
 
-- **移動先が別のウィンドウの裏にある。** 棚に置いてから移動先を手前に出し、棚からドラッグできます。
-- **添付やアップロードの画面をまだ開いていない。** 先にファイルを棚へ置き、メッセージやアップロード画面を準備してから、ファイルを受け取れるアプリへ渡せます。
-- **使いたいファイルが別々のフォルダにある。** 見つけたものから棚に集め、使うときに取り出せます。
+棚が自動で現れない場合は、メニューバーのメニューから手動で表示できます。
 
-ウィンドウ・アプリ・Spaces を切り替える場面での利用を想定しています。ただし、現時点では実験的なアプリです。ドラッグ検知や受け渡し先との相性には差があり、フルスクリーンや複数ディスプレイでの動作は追加の実機検証が必要です。
+### 主な機能
 
-### 置いたあとも、探しやすく・使いやすく
+- **ドラッグ中に現れる棚。** 表示位置は画面の四隅、またはドラッグ中のファイルの近くから選べます。
+- **置いたファイルを見分けやすく。** リスト／アイコン表示で名前を確認でき、生成可能な場合はサムネイル、それ以外はファイルのアイコンを表示します。
+- **別のアプリを開かずにプレビュー。** サムネイルや名前をクリックし、カーソルをその上に置いて **スペースキー** を押すとクイックルックで確認できます。もう一度スペースキー、または **Esc** で閉じます。
+- **再起動しても棚の内容を保持。** 保存件数は 5／10／25／50／100 件から選べ、初期値は 25 件です。上限を超えると古い参照から棚を外します。
+- **元ファイルを消さずに片付ける。** × で取り外すのは棚の項目だけです。最後の項目を取り外すと棚が隠れます。
+- **作業に合わせた見た目。** 透明度は 0〜60% で調整でき、ファイルが入っている間は棚が手前に表示されます。
+- **起動とアイコン表示を選択。** ログイン時起動を設定でき、メニューバーと Dock のアイコンはそれぞれ表示・非表示にできます。
 
-- **何を置いたか見える。** リスト／アイコン表示でファイル名を確認でき、macOS が生成できる場合はサムネイルも表示します。生成できない場合はファイルのアイコンを使います。
-- **使う前に中身を確認できる。** サムネイルや名前をクリックし、カーソルをその上に置いて **スペースキー** を押すと、標準のクイックルックでプレビューできます。もう一度スペースキー、または **Esc** で閉じます。
-- **再起動後も続きを使える。** ファイルへの参照はアプリを終了しても残ります。保存件数は 5／10／25／50／100 件から選択でき、初期値は 25 件です。上限を超えると、古い参照から棚を外します。ディスク上のファイルは消しません。
-- **棚だけを片付けられる。** 各項目の × は棚から取り外すためのボタンです。元ファイルは削除しません。最後の項目を取り外すと棚が隠れます。
+### 設定と、置いたファイルの管理
 
-DragShelf は、バックアップ・クラウドストレージ・クリップボードの自動記録アプリではありません。現在対応するのはローカルのファイルとフォルダです。アプリから取り出した任意のテキストや URL、コピーした画像、未完了のダウンロードなどには対応していません。参照先の元ファイルは引き続き必要です。見つからないファイルは利用不可として残り、移動したファイルは通常ブックマークで追跡できますが、必ず復元できるとは限りません。
+棚の歯車から管理画面を開けます。メニューバーのメニューや「アプリケーション」から DragShelf を起動する方法でも開けるため、両方のアイコンを隠していても設定に戻れます。
 
-### 自分の作業環境に合わせる
-
-棚の歯車、メニューバーのメニュー、または「アプリケーション」から DragShelf を開くと、管理画面を表示できます。「設定」には棚の見た目・履歴件数・起動の設定を、「一時置き」には置いたファイルの確認と取り外しをまとめています。
-
-棚の位置は画面の四隅、またはドラッグ中のファイルの近くから選べます。リスト／アイコン表示と透明度（0〜60%）も変更できます。ファイルが入っている間、棚は手前に表示されます。ログイン時の自動起動、メニューバーと Dock のアイコン表示も選べます。両方のアイコンを隠しても、「アプリケーション」から DragShelf を開けば管理画面に戻れます。メニューバーからは棚を手動で表示・非表示にできます。
+「設定」には見た目・表示位置・履歴件数・起動・権限の操作をまとめています。「一時置き」では、置いたファイルへの参照を確認・取り外しできます。メニューバーからは棚を表示・非表示にできます。
 
 ### インストール
 
@@ -134,6 +132,10 @@ brew install --cask dragshelf
 または、[GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.1.6-macos-arm64.zip` を取得し、展開した `DragShelf.app` を **「アプリケーション」**へ置きます。
 
 ### 権限と、現在の制限
+
+現在対応するのはローカルのファイルとフォルダです。任意のテキストや Web の URL、ファイル以外のアプリ内コンテンツ、クリップボードの自動記録、未完了のダウンロードなどには対応していません。バックアップやクラウドストレージではないため、元ファイルは引き続き必要です。見つからない参照は利用不可として残り、移動したファイルはブックマークで追跡できる場合がありますが、復元を保証するものではありません。
+
+ドラッグの自動検知や受け渡し先との相性には差があり、フルスクリーンや複数ディスプレイでの利用は追加の実機検証が必要です。
 
 ドラッグ検知のため、未許可の場合は起動時に **入力監視**の許可を求めます。許可は利用者自身が macOS で操作するもので、管理画面にはアプリ側の実際の判定と検知方式を表示します。入力監視なしでも AppKit による代替方式が動く場合があります。棚の手動操作は引き続き利用でき、クイックルックのための追加のキーボード監視権限は不要です。
 
