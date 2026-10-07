@@ -51,11 +51,11 @@ Use **Settings** for appearance, placement, history size, startup, and permissio
 
 Settings groups related choices under **General**, **Shelf Appearance**, **History**, and **Drag Detection**. Detailed permission troubleshooting is available through **Help**.
 
-The language selector updates Settings, the shelf, and the menu-bar menu without resetting parked files or other preferences. This feature is in the current source; the v0.1.6 release download does not include it yet.
+The language selector updates Settings, the shelf, and the menu-bar menu without resetting parked files or other preferences.
 
 ### Install
 
-Requirements: **macOS 14 or later**. The current v0.1.6 download is for **Apple Silicon (arm64)** Macs.
+Requirements: **macOS 14 or later**. The current v0.2.0 download is for **Apple Silicon (arm64)** Macs.
 
 **Signing notice & Gatekeeper:** DragShelf is free, open-source, and ad-hoc signed (without an Apple Developer ID certificate). On macOS Sonoma/Sequoia, Gatekeeper may display a prompt stating that the app *"is damaged and can't be opened"* or *"cannot be opened because the developer cannot be verified"*. 
 
@@ -74,7 +74,7 @@ brew tap nanonigit/dragshelf
 brew install --cask dragshelf
 ```
 
-Or download `DragShelf-0.1.6-macos-arm64.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and put `DragShelf.app` in **Applications**.
+Or download `DragShelf-0.2.0-macos-arm64.zip` from [GitHub Releases](https://github.com/nanonigit/DragShelf/releases), extract it, and put `DragShelf.app` in **Applications**.
 
 ### Permissions and current limitations
 
@@ -141,7 +141,7 @@ ChatGPT や Claude、Cursor などの AI ツールを日常的に使うように
 
 棚の歯車から管理画面を開けます。メニューバーのメニューや「アプリケーション」から DragShelf を起動する方法でも開けるため、両方のアイコンを隠していても設定に戻れます。
 
-言語を変更すると、設定・棚・メニューバーの文言が切り替わります。一時置きしたファイルや他の設定は初期化しません。この機能は現行ソースに含まれますが、公開済みの v0.1.6 のダウンロードにはまだ含まれていません。
+言語を変更すると、設定・棚・メニューバーの文言が切り替わります。一時置きしたファイルや他の設定は初期化しません。
 
 設定項目は「基本設定」「棚の表示」「履歴」「ドラッグ検知」にまとめています。入力監視の詳しいトラブル対処は「ヘルプ」から確認できます。
 
@@ -149,7 +149,7 @@ ChatGPT や Claude、Cursor などの AI ツールを日常的に使うように
 
 ### インストール
 
-動作環境は **macOS 14 以降**（Apple Silicon / arm64）です。
+動作環境は **macOS 14 以降**（Apple Silicon / arm64）です。最新の v0.2.0 配布バイナリを利用できます。
 
 **署名・起動について（Gatekeeperの回避）:** 本アプリはオープンソースのアドホック署名でビルドされているため、macOS のセキュリティ機能（Gatekeeper）により「壊れているため開けません」「開発元を検証できません」と警告される場合があります。その場合はターミナルで以下の1行を実行してください：
 
@@ -166,7 +166,7 @@ brew tap nanonigit/dragshelf
 brew install --cask dragshelf
 ```
 
-または、[GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.1.6-macos-arm64.zip` を取得し、展開した `DragShelf.app` を **「アプリケーション」**へ置きます。
+または、[GitHub Releases](https://github.com/nanonigit/DragShelf/releases) から `DragShelf-0.2.0-macos-arm64.zip` を取得し、展開した `DragShelf.app` を **「アプリケーション」**へ置きます。
 
 ### 権限と、現在の制限
 
