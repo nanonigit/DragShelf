@@ -2,3 +2,5 @@
 dist/
 releases/
 .swiftpm/
+.DS_Store
+.codex/

@@ -57,7 +57,15 @@ The language selector updates Settings, the shelf, and the menu-bar menu without
 
 Requirements: **macOS 14 or later**. The current v0.1.6 download is for **Apple Silicon (arm64)** Macs.
 
-**Signing notice:** the app is ad-hoc signed, not Developer ID signed or notarized. Gatekeeper may block a downloaded copy. Review the source and release before deciding whether to allow it in **System Settings → Privacy & Security**. The Homebrew tap does not bypass Gatekeeper.
+**Signing notice & Gatekeeper:** DragShelf is free, open-source, and ad-hoc signed (without an Apple Developer ID certificate). On macOS Sonoma/Sequoia, Gatekeeper may display a prompt stating that the app *"is damaged and can't be opened"* or *"cannot be opened because the developer cannot be verified"*. 
+
+To allow it, simply run this one-line command in Terminal:
+
+```bash
+xattr -cr /Applications/DragShelf.app
+```
+
+*(Or right-click `DragShelf.app` in Finder, choose **Open**, or allow it under **System Settings → Privacy & Security**).*
 
 With the [dedicated Homebrew tap](https://github.com/nanonigit/homebrew-DragShelf):
 
@@ -141,9 +149,15 @@ ChatGPT や Claude、Cursor などの AI ツールを日常的に使うように
 
 ### インストール
 
-動作環境は **macOS 14 以降**です。現在の v0.1.6 の配布バイナリは **Apple Silicon（arm64）Mac 用**です。
+動作環境は **macOS 14 以降**（Apple Silicon / arm64）です。
 
-**署名について:** 配布版はアドホック署名のみで、Developer ID 署名・公証はありません。ダウンロードしたアプリは Gatekeeper に止められる場合があります。ソースと配布物を確認し、許可する場合は「システム設定 → プライバシーとセキュリティ」から操作してください。Homebrew tap は Gatekeeper を自動で回避しません。
+**署名・起動について（Gatekeeperの回避）:** 本アプリはオープンソースのアドホック署名でビルドされているため、macOS のセキュリティ機能（Gatekeeper）により「壊れているため開けません」「開発元を検証できません」と警告される場合があります。その場合はターミナルで以下の1行を実行してください：
+
+```bash
+xattr -cr /Applications/DragShelf.app
+```
+
+*(または Finder でアプリを右クリックして「開く」を選択、または「システム設定 → プライバシーとセキュリティ」から「このまま開く」を許可してください)*
 
 [専用 Homebrew tap](https://github.com/nanonigit/homebrew-DragShelf) を使う場合:
 
